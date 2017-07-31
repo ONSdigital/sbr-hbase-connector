@@ -30,6 +30,7 @@ public class HBaseEnterpriseDAO implements EnterpriseDAO {
         this.config = config;
     }
 
+    @Override
     public Optional<Enterprise> getEnterprise(YearMonth referencePeriod, String key) throws IOException {
        return this.getEnterprise(RowKeyUtils.createRowKey(referencePeriod, key));
     }
@@ -41,16 +42,16 @@ public class HBaseEnterpriseDAO implements EnterpriseDAO {
                 Get get = new Get(Bytes.toBytes(rowKey));
                 Result result = table.get(get);
                 if (result.isEmpty()) {
-                    LOG.debug("No enterprise data found for rowKey {}", rowKey);
+                    LOG.debug("No enterprise data found for rowKey '{}'", rowKey);
                     enterprise = Optional.empty();
                 } else {
-                    LOG.debug("Found enterprise data found for rowKey {}", rowKey);
+                    LOG.debug("Found enterprise data for rowKey '{}'", rowKey);
                     enterprise = Optional.of(convertToEnterprise(result));
                 }
             }
         }
         catch (IOException e) {
-            LOG.error("Error getting enterprise data for rowKey {}", rowKey, e);
+            LOG.error("Error getting enterprise data for rowKey '{}'", rowKey, e);
             throw e;
         }
         return enterprise;
@@ -61,12 +62,13 @@ public class HBaseEnterpriseDAO implements EnterpriseDAO {
         for (Cell cell : result.listCells()) {
             String column = new String(CellUtil.cloneQualifier(cell));
             String value = new String(CellUtil.cloneValue(cell));
-            LOG.debug("Found enterprise data column with value {}", column, value);
+            LOG.debug("Found enterprise data column {} with value '{}'", column, value);
             enterprise.putVariable(column, value);
         }
         return enterprise;
     }
 
+    @Override
     public void putEnterprise(Enterprise enterprise) throws IOException {
         Put enterpriseRow;
         String rowKey = RowKeyUtils.createRowKey(enterprise.getReferencePeriod(), enterprise.getKey());

@@ -6,8 +6,10 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import uk.gov.ons.sbr.data.domain.Enterprise;
+import uk.gov.ons.sbr.data.hbase.AbstractHBaseIT;
 import uk.gov.ons.sbr.data.hbase.HBaseConfig;
 import uk.gov.ons.sbr.data.hbase.dao.HBaseEnterpriseDAO;
+import uk.gov.ons.sbr.data.hbase.dao.HBaseUnitDAO;
 
 import java.io.IOException;
 import java.time.YearMonth;
@@ -17,24 +19,15 @@ import java.util.Optional;
 
 import static org.junit.Assert.*;
 
-public class EnterpriseControllerIT {
+public class EnterpriseControllerIT extends AbstractHBaseIT {
 
-    private static HBaseTestingUtility utility;
     private static final YearMonth TEST_REFERENCE_PERIOD = YearMonth.of(2017, 7);
     private static final String TEST_ENTERPRISE_REFERENCE_NUMBER = "123456789";
     private EnterpriseController controller;
 
-    @BeforeClass
-    public static void init() throws Exception {
-        utility = new HBaseTestingUtility();
-        utility.startMiniCluster();
-        utility.createTable(Bytes.toBytes(HBaseEnterpriseDAO.ENTERPRISE_TABLE_NAME), HBaseEnterpriseDAO.ENTERPRISE_CF);
-        utility.getConfiguration();
-    }
-
     @Before
     public void setup() throws Exception {
-        controller = new EnterpriseController(new HBaseConfig(utility.getConfiguration()));
+        controller = new EnterpriseController(new HBaseConfig(getHBaseTestingUtility().getConfiguration()));
     }
 
     @Test

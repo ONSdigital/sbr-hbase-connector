@@ -1,12 +1,19 @@
 package uk.gov.ons.sbr.data.hbase.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.ons.sbr.data.domain.Enterprise;
+import uk.gov.ons.sbr.data.domain.Unit;
+import uk.gov.ons.sbr.data.domain.UnitLinks;
+import uk.gov.ons.sbr.data.domain.UnitType;
+import uk.gov.ons.sbr.data.hbase.dao.HBaseUnitDAO;
 
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 
 public class RowKeyUtils {
 
+    private static final Logger LOG = LoggerFactory.getLogger(HBaseUnitDAO.class.getName());
     private static final String REFERENCE_PERIOD_FORMAT = "yyyyMM";
     private static final String DELIMETER = "~";
 
@@ -25,11 +32,14 @@ public class RowKeyUtils {
     public static String createRowKey(YearMonth referencePeriod, String... rowKeyParts) {
         String prefix = referencePeriod.format(DateTimeFormatter.ofPattern(REFERENCE_PERIOD_FORMAT));
         String suffix = createRowKey(rowKeyParts);
+        String rowKey;
         if (suffix.isEmpty()) {
-            return prefix;
+            rowKey = prefix;
         } else {
-            return prefix + DELIMETER + suffix;
+            rowKey = prefix + DELIMETER + suffix;
         }
+        LOG.debug("Created row key '{}'", rowKey);
+        return rowKey;
     }
 
     public static String createRowKey(String... rowKeyParts) {
@@ -41,5 +51,14 @@ public class RowKeyUtils {
         final YearMonth referencePeriod = YearMonth.parse(compositeRowKeyParts[0], DateTimeFormatter.ofPattern(REFERENCE_PERIOD_FORMAT));
         final String key = compositeRowKeyParts[1];
         return new Enterprise(referencePeriod, key);
+    }
+
+    public static Unit createUnitFromRowKey(String rowKey) {
+
+        final String[] compositeRowKeyParts = RowKeyUtils.splitRowKey(rowKey);
+        final YearMonth referencePeriod = YearMonth.parse(compositeRowKeyParts[0], DateTimeFormatter.ofPattern(REFERENCE_PERIOD_FORMAT));
+        final String key = compositeRowKeyParts[1];
+        final UnitType type = UnitType.fromString(compositeRowKeyParts[2]);
+        return new Unit(referencePeriod, key, type);
     }
 }

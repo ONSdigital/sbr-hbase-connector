@@ -1,9 +1,13 @@
 package uk.gov.ons.sbr.data.controller;
 
 import uk.gov.ons.sbr.data.dao.EnterpriseDAO;
+import uk.gov.ons.sbr.data.dao.UnitDAO;
 import uk.gov.ons.sbr.data.domain.Enterprise;
+import uk.gov.ons.sbr.data.domain.UnitLinks;
+import uk.gov.ons.sbr.data.domain.UnitType;
 import uk.gov.ons.sbr.data.hbase.HBaseConfig;
 import uk.gov.ons.sbr.data.hbase.dao.HBaseEnterpriseDAO;
+import uk.gov.ons.sbr.data.hbase.dao.HBaseUnitDAO;
 
 import java.io.IOException;
 import java.time.YearMonth;
@@ -15,15 +19,24 @@ import java.util.Optional;
  */
 public class EnterpriseController {
 
-
     private EnterpriseDAO enterpriseDAO;
+    private UnitDAO unitLinksDAO;
+
 
     public EnterpriseController(HBaseConfig config) {
         this.enterpriseDAO = new HBaseEnterpriseDAO(config);
+        this.unitLinksDAO = new HBaseUnitDAO(config);
     }
 
     public Optional<Enterprise> getEnterprise(YearMonth referencePeriod, String enterpriseReferenceNumber) throws IOException {
-        return enterpriseDAO.getEnterprise(referencePeriod, enterpriseReferenceNumber);
+        Optional<Enterprise> enterprise = enterpriseDAO.getEnterprise(referencePeriod, enterpriseReferenceNumber);
+        if (enterprise.isPresent()) {
+            Optional<UnitLinks> links = unitLinksDAO.getUnitLinks(referencePeriod, enterpriseReferenceNumber, UnitType.ENTERPRISE);
+            if (links.isPresent()) {
+                enterprise.get().setLinks(unitLinksDAO.getUnitLinks(referencePeriod, enterpriseReferenceNumber, UnitType.ENTERPRISE).get());
+            }
+        }
+        return enterprise;
     }
 
     public void updateEnterpriseVariableValue(YearMonth referencePeriod, String enterpriseReferenceNumber, String variableName, String newValue) throws IOException {

@@ -7,24 +7,13 @@ import java.util.Map;
 /**
  * Represents an Enterprise Unit
  */
-public class Enterprise {
+public class Enterprise extends Unit {
 
-    private YearMonth referencePeriod;
-    private String key;
     private Map<String, String> variables;
 
     public Enterprise(YearMonth referencePeriod, String key) {
-        this.referencePeriod = referencePeriod;
-        this.key = key;
+        super(referencePeriod, key, UnitType.ENTERPRISE);
         this.variables = new HashMap<>();
-    }
-
-    public String getKey() {
-        return key;
-    }
-
-    public YearMonth getReferencePeriod() {
-        return referencePeriod;
     }
 
     public Map<String, String> getVariables() {
