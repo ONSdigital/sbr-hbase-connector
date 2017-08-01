@@ -11,9 +11,7 @@ import java.time.YearMonth;
 public class DataLoader {
 
     public static void main(String [] args) throws IOException {
-        Configuration conf = new Configuration();
-        conf.addResource("hbase-site.xml");
-        HBaseConfig config = new HBaseConfig(conf);
+        HBaseConfig config = new HBaseConfig();
         EnterpriseController entController =  new EnterpriseController(config);
         entController.updateEnterpriseVariableValue(YearMonth.of(2017, Month.JULY), "12345",  "name", "test");
     }

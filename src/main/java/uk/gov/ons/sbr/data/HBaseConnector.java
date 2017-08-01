@@ -1,6 +1,5 @@
 package uk.gov.ons.sbr.data;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,7 +8,6 @@ import uk.gov.ons.sbr.data.controller.UnitController;
 import uk.gov.ons.sbr.data.hbase.HBaseConfig;
 import uk.gov.ons.sbr.data.hbase.table.TableNames;
 
-import java.io.File;
 import java.io.IOException;
 
 public class HBaseConnector {
@@ -54,17 +52,14 @@ public class HBaseConnector {
     }
 
     public static void main(String [] args) throws IOException {
-        Configuration conf = new Configuration();
-        if (args.length >0) {
-            File file = new File(args[0]);
-            if (file.exists() && file.isFile()) {
-                LOG.info("Found HBase site config file {}", file.getCanonicalPath());
-                conf.addResource(args[0]);
-            } else {
-                LOG.warn("Cannot find HBase config file {}", file.getCanonicalPath());
-            }
+        HBaseConnector connector;
+        if (args.length == 1) {
+            connector = new HBaseConnector(new HBaseConfig(args[0]));
+        } else if (args.length > 1) {
+            connector = new HBaseConnector(new HBaseConfig(args[0], Integer.valueOf(args[1])));
+        } else {
+            connector = new HBaseConnector(new HBaseConfig());
         }
-        HBaseConnector connector = new HBaseConnector(new HBaseConfig(conf));
         connector.validateSchema();
     }
 
