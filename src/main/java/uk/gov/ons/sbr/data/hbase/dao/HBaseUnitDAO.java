@@ -12,6 +12,8 @@ import uk.gov.ons.sbr.data.domain.Unit;
 import uk.gov.ons.sbr.data.domain.UnitLinks;
 import uk.gov.ons.sbr.data.domain.UnitType;
 import uk.gov.ons.sbr.data.hbase.HBaseConfig;
+import uk.gov.ons.sbr.data.hbase.table.ColumnFamilies;
+import uk.gov.ons.sbr.data.hbase.table.TableNames;
 import uk.gov.ons.sbr.data.hbase.util.RowKeyUtils;
 
 import java.io.IOException;
@@ -22,8 +24,8 @@ import java.util.Optional;
 
 public class HBaseUnitDAO implements UnitDAO {
 
-    public static final String UNIT_LINKS_TABLE_NAME = "unit_links";
-    public static final byte[] UNIT_LINKS_CF = Bytes.toBytes("d");
+    private static final TableName UNIT_LINKS_TABLE = TableNames.UNIT_LINKS.getTableName();
+    private static final byte[] UNIT_LINKS_CF = ColumnFamilies.UNIT_LINKS_DATA.getColumnFamily();
     private static final String CHILDREN_COLUMN = "children";
     private static final String PARENT_COLUMN_PREFIX = "p_";
     private static final Logger LOG = LoggerFactory.getLogger(HBaseUnitDAO.class.getName());
@@ -39,7 +41,7 @@ public class HBaseUnitDAO implements UnitDAO {
         String partialRowKey = RowKeyUtils.createRowKey(referencePeriod, key);
         Optional<List<Unit>> matchingUnits;
         try (Connection connection = config.getConnection()) {
-            try (Table table = connection.getTable(TableName.valueOf(UNIT_LINKS_TABLE_NAME))) {
+            try (Table table = connection.getTable(UNIT_LINKS_TABLE)) {
                 byte[] prefix = Bytes.toBytes(partialRowKey);
                 Scan scan = new Scan(prefix);
                 scan.addFamily(UNIT_LINKS_CF);
@@ -70,7 +72,7 @@ public class HBaseUnitDAO implements UnitDAO {
         String rowKey = RowKeyUtils.createRowKey(referencePeriod, key, type.toString());
         Optional<UnitLinks> links;
         try (Connection connection = config.getConnection()) {
-            try (Table table = connection.getTable(TableName.valueOf(UNIT_LINKS_TABLE_NAME))) {
+            try (Table table = connection.getTable(UNIT_LINKS_TABLE)) {
                 Get get = new Get(Bytes.toBytes(rowKey));
                 Result result = table.get(get);
                 if (result.isEmpty()) {
@@ -114,7 +116,7 @@ public class HBaseUnitDAO implements UnitDAO {
         String rowKey = RowKeyUtils.createRowKey(links.getReferencePeriod(), links.getKey(), type.toString());
 
         try (Connection connection = config.getConnection();
-             Table table = connection.getTable(TableName.valueOf(UNIT_LINKS_TABLE_NAME))) {
+             Table table = connection.getTable(UNIT_LINKS_TABLE)) {
 
             linksRow = new Put(Bytes.toBytes(rowKey));
             // Add parents

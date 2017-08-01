@@ -6,6 +6,7 @@ import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.hadoop.yarn.webapp.hamlet.HamletSpec;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,6 +16,8 @@ import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.ons.sbr.data.hbase.HBaseConfig;
+import uk.gov.ons.sbr.data.hbase.table.ColumnFamilies;
+import uk.gov.ons.sbr.data.hbase.table.TableNames;
 import uk.gov.ons.sbr.data.hbase.util.RowKeyUtils;
 
 import java.io.IOException;
@@ -26,7 +29,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.ons.sbr.data.hbase.dao.HBaseEnterpriseDAO.ENTERPRISE_TABLE_NAME;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HBaseEnterpriseDAOTest extends AbstractHBaseEnterpriseDAOTest {
@@ -48,7 +50,7 @@ public class HBaseEnterpriseDAOTest extends AbstractHBaseEnterpriseDAOTest {
         setConfig(config);
         setDao(new HBaseEnterpriseDAO(getConfig()));
         when(config.getConnection()).thenReturn(connection);
-        when(connection.getTable(TableName.valueOf(ENTERPRISE_TABLE_NAME))).thenReturn(table);
+        when(connection.getTable(TableNames.ENTERPRISE.getTableName())).thenReturn(table);
         putCaptor = ArgumentCaptor.forClass(Put.class);
     }
 
@@ -58,7 +60,7 @@ public class HBaseEnterpriseDAOTest extends AbstractHBaseEnterpriseDAOTest {
         byte[] rowKey = Bytes.toBytes(RowKeyUtils.createRowKey(TEST_REFERENCE_PERIOD, TEST_ENTERPRISE_KEY));
         List<Cell> cells = new ArrayList<>();
         testEnterpriseVariables.forEach((variable, value) -> {
-                    Cell cell = CellUtil.createCell(rowKey, HBaseEnterpriseDAO.ENTERPRISE_CF, Bytes.toBytes(variable), System.currentTimeMillis(), KeyValue.Type.Put.getCode(), Bytes.toBytes(value));
+                    Cell cell = CellUtil.createCell(rowKey, ColumnFamilies.ENTERPRISE_DATA.getColumnFamily(), Bytes.toBytes(variable), System.currentTimeMillis(), KeyValue.Type.Put.getCode(), Bytes.toBytes(value));
                 cells.add(cell);
                 });
         result = Result.create(cells);
@@ -80,7 +82,7 @@ public class HBaseEnterpriseDAOTest extends AbstractHBaseEnterpriseDAOTest {
 
     @Test(expected = IOException.class)
     public void getEnterpriseFailedConnection() throws Exception {
-        when(config.getConnection()).thenThrow(new IOException("Connection to HBase failed"));
+        when(config.getConnection()).thenThrow(new IOException("Expected exception - Mocking Connection to HBase failed"));
         getEnterprise();
     }
 
@@ -98,8 +100,8 @@ public class HBaseEnterpriseDAOTest extends AbstractHBaseEnterpriseDAOTest {
 
         // Test columns
         testEnterpriseVariables.forEach((column, value) -> {
-            assertTrue("Failure - no column for " + column, put.has(HBaseEnterpriseDAO.ENTERPRISE_CF, Bytes.toBytes(column)));
-            String putColumnValue = Bytes.toString(CellUtil.cloneValue((put.get(HBaseEnterpriseDAO.ENTERPRISE_CF,
+            assertTrue("Failure - no column for " + column, put.has(ColumnFamilies.ENTERPRISE_DATA.getColumnFamily(), Bytes.toBytes(column)));
+            String putColumnValue = Bytes.toString(CellUtil.cloneValue((put.get(ColumnFamilies.ENTERPRISE_DATA.getColumnFamily(),
                     Bytes.toBytes(column)).get(0))));
             assertEquals("Failure - invalid " + column, value, putColumnValue);
         });
@@ -108,7 +110,7 @@ public class HBaseEnterpriseDAOTest extends AbstractHBaseEnterpriseDAOTest {
 
     @Test(expected = IOException.class)
     public void putEnterpriseFailedConnection() throws Exception {
-        when(config.getConnection()).thenThrow(new IOException("Connection to HBase failed"));
+        when(config.getConnection()).thenThrow(new IOException("Expected exception - Mocking Connection to HBase failed"));
         putEnterprise();
     }
 

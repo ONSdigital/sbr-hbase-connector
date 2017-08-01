@@ -7,6 +7,7 @@ import uk.gov.ons.sbr.data.domain.UnitLinks;
 import uk.gov.ons.sbr.data.domain.UnitType;
 import uk.gov.ons.sbr.data.hbase.HBaseConfig;
 import uk.gov.ons.sbr.data.hbase.dao.HBaseUnitDAO;
+import uk.gov.ons.sbr.data.hbase.util.ReferencePeriodUtils;
 
 import java.io.IOException;
 import java.time.YearMonth;
@@ -23,6 +24,10 @@ public class UnitController {
 
     public UnitController(HBaseConfig config) {
         this.unitLinksDAO = new HBaseUnitDAO(config);
+    }
+
+    public Optional<List<Unit>> findUnits(String unitReferenceNumber) throws IOException {
+        return findUnits(ReferencePeriodUtils.getCurrentPeriod(), unitReferenceNumber);
     }
 
     public Optional<List<Unit>> findUnits(YearMonth referencePeriod, String unitReferenceNumber) throws IOException {

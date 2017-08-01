@@ -1,19 +1,14 @@
 package uk.gov.ons.sbr.data.hbase.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.gov.ons.sbr.data.domain.Enterprise;
 import uk.gov.ons.sbr.data.domain.Unit;
-import uk.gov.ons.sbr.data.domain.UnitLinks;
 import uk.gov.ons.sbr.data.domain.UnitType;
-import uk.gov.ons.sbr.data.hbase.dao.HBaseUnitDAO;
 
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 
 public class RowKeyUtils {
 
-    private static final Logger LOG = LoggerFactory.getLogger(HBaseUnitDAO.class.getName());
     private static final String REFERENCE_PERIOD_FORMAT = "yyyyMM";
     private static final String DELIMETER = "~";
 
@@ -38,7 +33,6 @@ public class RowKeyUtils {
         } else {
             rowKey = prefix + DELIMETER + suffix;
         }
-        LOG.debug("Created row key '{}'", rowKey);
         return rowKey;
     }
 

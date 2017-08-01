@@ -10,6 +10,7 @@ import uk.gov.ons.sbr.data.hbase.HBaseConfig;
 import uk.gov.ons.sbr.data.hbase.dao.HBaseEnterpriseDAO;
 import uk.gov.ons.sbr.data.hbase.dao.HBaseUnitDAO;
 
+import java.time.Month;
 import java.time.YearMonth;
 import java.util.HashMap;
 import java.util.List;
@@ -21,7 +22,7 @@ import static org.junit.Assert.assertTrue;
 
 public class UnitControllerIT extends AbstractHBaseIT {
 
-    private static final YearMonth TEST_REFERENCE_PERIOD = YearMonth.of(2017, 7);
+    private static final YearMonth TEST_REFERENCE_PERIOD = YearMonth.of(2017, Month.JUNE);
     private static final String TEST_ENTERPRISE_REFERENCE_NUMBER = "123456789";
     private static final String TEST_KEY = "635663737";
     private UnitController controller;

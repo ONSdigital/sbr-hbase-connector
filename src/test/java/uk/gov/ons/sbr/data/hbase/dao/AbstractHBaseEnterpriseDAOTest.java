@@ -6,6 +6,7 @@ import uk.gov.ons.sbr.data.domain.Enterprise;
 import uk.gov.ons.sbr.data.hbase.HBaseConfig;
 
 import java.io.IOException;
+import java.time.Month;
 import java.time.YearMonth;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +16,7 @@ import static org.junit.Assert.*;
 
 public abstract class AbstractHBaseEnterpriseDAOTest {
 
-    static final YearMonth TEST_REFERENCE_PERIOD = YearMonth.of(2017, 7);
+    static final YearMonth TEST_REFERENCE_PERIOD = YearMonth.of(2017, Month.JUNE);
     static final String TEST_ENTERPRISE_KEY = "123456789";
     private static final String TEST_INVALID_ENTERPRISE_KEY = "000000000";
     private HBaseEnterpriseDAO dao;
@@ -24,15 +25,15 @@ public abstract class AbstractHBaseEnterpriseDAOTest {
     Enterprise testEnterprise;
 
 
-    public void setDao(HBaseEnterpriseDAO dao) {
+    void setDao(HBaseEnterpriseDAO dao) {
         this.dao = dao;
     }
 
-    public void setConfig(HBaseConfig config) {
+    void setConfig(HBaseConfig config) {
         this.config = config;
     }
 
-    public HBaseConfig getConfig() {
+    HBaseConfig getConfig() {
         return config;
     }
 

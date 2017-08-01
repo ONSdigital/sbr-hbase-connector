@@ -1,11 +1,12 @@
 package uk.gov.ons.sbr.data.hbase.dao;
 
 import org.apache.hadoop.hbase.HBaseTestingUtility;
-import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import uk.gov.ons.sbr.data.hbase.HBaseConfig;
+import uk.gov.ons.sbr.data.hbase.table.ColumnFamilies;
+import uk.gov.ons.sbr.data.hbase.table.TableNames;
 
 import java.io.IOException;
 
@@ -18,7 +19,7 @@ public class HBaseEnterpriseDAOIT extends AbstractHBaseEnterpriseDAOTest {
     public static void init() throws Exception {
         utility = new HBaseTestingUtility();
         utility.startMiniCluster();
-        utility.createTable(Bytes.toBytes(HBaseEnterpriseDAO.ENTERPRISE_TABLE_NAME), HBaseEnterpriseDAO.ENTERPRISE_CF);
+        utility.createTable(TableNames.ENTERPRISE.getTableName(), ColumnFamilies.ENTERPRISE_DATA.getColumnFamily());
         utility.getConfiguration();
     }
 

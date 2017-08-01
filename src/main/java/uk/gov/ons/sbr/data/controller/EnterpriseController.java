@@ -8,6 +8,7 @@ import uk.gov.ons.sbr.data.domain.UnitType;
 import uk.gov.ons.sbr.data.hbase.HBaseConfig;
 import uk.gov.ons.sbr.data.hbase.dao.HBaseEnterpriseDAO;
 import uk.gov.ons.sbr.data.hbase.dao.HBaseUnitDAO;
+import uk.gov.ons.sbr.data.hbase.util.ReferencePeriodUtils;
 
 import java.io.IOException;
 import java.time.YearMonth;
@@ -26,6 +27,10 @@ public class EnterpriseController {
     public EnterpriseController(HBaseConfig config) {
         this.enterpriseDAO = new HBaseEnterpriseDAO(config);
         this.unitLinksDAO = new HBaseUnitDAO(config);
+    }
+
+    public Optional<Enterprise> getEnterprise(String enterpriseReferenceNumber) throws IOException {
+        return getEnterprise(ReferencePeriodUtils.getCurrentPeriod(), enterpriseReferenceNumber);
     }
 
     public Optional<Enterprise> getEnterprise(YearMonth referencePeriod, String enterpriseReferenceNumber) throws IOException {
