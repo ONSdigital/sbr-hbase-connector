@@ -3,7 +3,6 @@ package uk.gov.ons.sbr.data.hbase.dao;
 import org.junit.Before;
 import org.junit.Test;
 import uk.gov.ons.sbr.data.domain.Enterprise;
-import uk.gov.ons.sbr.data.hbase.HBaseConfig;
 
 import java.io.IOException;
 import java.time.Month;
@@ -20,21 +19,11 @@ public abstract class AbstractHBaseEnterpriseDAOTest {
     static final String TEST_ENTERPRISE_KEY = "123456789";
     private static final String TEST_INVALID_ENTERPRISE_KEY = "000000000";
     private HBaseEnterpriseDAO dao;
-    private HBaseConfig config;
     Map<String, String> testEnterpriseVariables;
     Enterprise testEnterprise;
 
-
     void setDao(HBaseEnterpriseDAO dao) {
         this.dao = dao;
-    }
-
-    void setConfig(HBaseConfig config) {
-        this.config = config;
-    }
-
-    HBaseConfig getConfig() {
-        return config;
     }
 
     @Before
@@ -73,15 +62,9 @@ public abstract class AbstractHBaseEnterpriseDAOTest {
         assertFalse("Failure - result should be empty", optEnterprise.isPresent());
     }
 
-    @Test(expected = IOException.class)
-    public abstract void getEnterpriseFailedConnection() throws Exception;
-
     @Test
     public void putEnterprise() throws Exception {
         dao.putEnterprise(testEnterprise);
     }
-
-    @Test(expected = IOException.class)
-    public abstract void putEnterpriseFailedConnection() throws Exception;
 
 }

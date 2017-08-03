@@ -5,7 +5,6 @@ import uk.gov.ons.sbr.data.dao.UnitDAO;
 import uk.gov.ons.sbr.data.domain.Enterprise;
 import uk.gov.ons.sbr.data.domain.UnitLinks;
 import uk.gov.ons.sbr.data.domain.UnitType;
-import uk.gov.ons.sbr.data.hbase.HBaseConfig;
 import uk.gov.ons.sbr.data.hbase.dao.HBaseEnterpriseDAO;
 import uk.gov.ons.sbr.data.hbase.dao.HBaseUnitDAO;
 import uk.gov.ons.sbr.data.hbase.util.ReferencePeriodUtils;
@@ -23,10 +22,9 @@ public class EnterpriseController {
     private EnterpriseDAO enterpriseDAO;
     private UnitDAO unitLinksDAO;
 
-
-    public EnterpriseController(HBaseConfig config) {
-        this.enterpriseDAO = new HBaseEnterpriseDAO(config);
-        this.unitLinksDAO = new HBaseUnitDAO(config);
+    public EnterpriseController() {
+        this.enterpriseDAO = new HBaseEnterpriseDAO();
+        this.unitLinksDAO = new HBaseUnitDAO();
     }
 
     public Optional<Enterprise> getEnterprise(String enterpriseReferenceNumber) throws IOException {

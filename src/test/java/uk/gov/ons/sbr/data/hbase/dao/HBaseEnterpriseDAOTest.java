@@ -3,10 +3,8 @@ package uk.gov.ons.sbr.data.hbase.dao;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.KeyValue;
-import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.apache.hadoop.yarn.webapp.hamlet.HamletSpec;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,7 +13,7 @@ import org.mockito.Captor;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.ons.sbr.data.hbase.HBaseConfig;
+import uk.gov.ons.sbr.data.dao.EnterpriseDAO;
 import uk.gov.ons.sbr.data.hbase.table.ColumnFamilies;
 import uk.gov.ons.sbr.data.hbase.table.TableNames;
 import uk.gov.ons.sbr.data.hbase.util.RowKeyUtils;
@@ -38,8 +36,6 @@ public class HBaseEnterpriseDAOTest extends AbstractHBaseEnterpriseDAOTest {
     @Mock
     private Result result;
     @Mock
-    private HBaseConfig config;
-    @Mock
     private Connection connection;
     @Captor
     private ArgumentCaptor<Put> putCaptor;
@@ -47,9 +43,9 @@ public class HBaseEnterpriseDAOTest extends AbstractHBaseEnterpriseDAOTest {
     @Before
     public void setup() throws Exception {
         super.setup();
-        setConfig(config);
-        setDao(new HBaseEnterpriseDAO(getConfig()));
-        when(config.getConnection()).thenReturn(connection);
+        HBaseEnterpriseDAO dao = new HBaseEnterpriseDAO();
+        dao.setConnection(connection);
+        setDao(dao);
         when(connection.getTable(TableNames.ENTERPRISE.getTableName())).thenReturn(table);
         putCaptor = ArgumentCaptor.forClass(Put.class);
     }
@@ -80,12 +76,6 @@ public class HBaseEnterpriseDAOTest extends AbstractHBaseEnterpriseDAOTest {
         super.getEnterpriseNoResult();
     }
 
-    @Test(expected = IOException.class)
-    public void getEnterpriseFailedConnection() throws Exception {
-        when(config.getConnection()).thenThrow(new IOException("Expected exception - Mocking Connection to HBase failed"));
-        getEnterprise();
-    }
-
     @Test
     public void putEnterprise() throws Exception {
         super.putEnterprise();
@@ -106,12 +96,6 @@ public class HBaseEnterpriseDAOTest extends AbstractHBaseEnterpriseDAOTest {
             assertEquals("Failure - invalid " + column, value, putColumnValue);
         });
 
-    }
-
-    @Test(expected = IOException.class)
-    public void putEnterpriseFailedConnection() throws Exception {
-        when(config.getConnection()).thenThrow(new IOException("Expected exception - Mocking Connection to HBase failed"));
-        putEnterprise();
     }
 
 }

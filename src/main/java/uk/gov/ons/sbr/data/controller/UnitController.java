@@ -1,11 +1,9 @@
 package uk.gov.ons.sbr.data.controller;
 
 import uk.gov.ons.sbr.data.dao.UnitDAO;
-import uk.gov.ons.sbr.data.domain.Enterprise;
 import uk.gov.ons.sbr.data.domain.Unit;
 import uk.gov.ons.sbr.data.domain.UnitLinks;
 import uk.gov.ons.sbr.data.domain.UnitType;
-import uk.gov.ons.sbr.data.hbase.HBaseConfig;
 import uk.gov.ons.sbr.data.hbase.dao.HBaseUnitDAO;
 import uk.gov.ons.sbr.data.hbase.util.ReferencePeriodUtils;
 
@@ -22,8 +20,8 @@ public class UnitController {
 
     private UnitDAO unitLinksDAO;
 
-    public UnitController(HBaseConfig config) {
-        this.unitLinksDAO = new HBaseUnitDAO(config);
+    public UnitController() {
+        this.unitLinksDAO = new HBaseUnitDAO();
     }
 
     public Optional<List<Unit>> findUnits(String unitReferenceNumber) throws IOException {
@@ -39,7 +37,7 @@ public class UnitController {
         if (parents != null) {
             updatedLinks.setParents(parents);
         }
-        if (childrenJsonAsString != null){
+        if (childrenJsonAsString != null) {
             updatedLinks.setChildJsonString(childrenJsonAsString);
         }
         unitLinksDAO.putUnitLinks(updatedLinks, type);

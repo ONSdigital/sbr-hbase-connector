@@ -1,15 +1,10 @@
 package uk.gov.ons.sbr.data.controller;
 
-import org.apache.hadoop.hbase.HBaseTestingUtility;
-import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import uk.gov.ons.sbr.data.domain.Enterprise;
 import uk.gov.ons.sbr.data.hbase.AbstractHBaseIT;
-import uk.gov.ons.sbr.data.hbase.HBaseConfig;
-import uk.gov.ons.sbr.data.hbase.dao.HBaseEnterpriseDAO;
-import uk.gov.ons.sbr.data.hbase.dao.HBaseUnitDAO;
+import uk.gov.ons.sbr.data.hbase.util.ReferencePeriodUtils;
 
 import java.io.IOException;
 import java.time.Month;
@@ -28,7 +23,19 @@ public class EnterpriseControllerIT extends AbstractHBaseIT {
 
     @Before
     public void setup() throws Exception {
-        controller = new EnterpriseController(new HBaseConfig(getHBaseTestingUtility().getConfiguration()));
+        controller = new EnterpriseController();
+    }
+
+    @Test
+    public void getEnterpriseForCurrentPeriod() throws Exception {
+        // Use the update method to insert a new Enterprise
+        controller.updateEnterpriseVariableValue(ReferencePeriodUtils.getCurrentPeriod(), TEST_ENTERPRISE_REFERENCE_NUMBER, "name", "MyEnterprise");
+
+        //Retrieve the inserted Enterprise
+        Enterprise enterprise = validateReturnedEnterprise(controller.getEnterprise(TEST_ENTERPRISE_REFERENCE_NUMBER));
+
+        assertEquals("Failure - invalid enterprise reference period", ReferencePeriodUtils.getCurrentPeriod(), enterprise.getReferencePeriod());
+        assertEquals("Failure - invalid enterprise name", "MyEnterprise", enterprise.getVariables().get("name"));
     }
 
     @Test
@@ -37,8 +44,9 @@ public class EnterpriseControllerIT extends AbstractHBaseIT {
         controller.updateEnterpriseVariableValue(TEST_REFERENCE_PERIOD, TEST_ENTERPRISE_REFERENCE_NUMBER, "name", "MyEnterprise");
 
         //Retrieve the inserted Enterprise
-        Enterprise enterprise = assertEnterpriseExists();
+        Enterprise enterprise = validateReturnedEnterprise(controller.getEnterprise(TEST_ENTERPRISE_REFERENCE_NUMBER));
 
+        assertEquals("Failure - invalid enterprise reference period", TEST_REFERENCE_PERIOD, enterprise.getReferencePeriod());
         assertEquals("Failure - invalid enterprise name", "MyEnterprise", enterprise.getVariables().get("name"));
     }
 
@@ -48,8 +56,9 @@ public class EnterpriseControllerIT extends AbstractHBaseIT {
         controller.updateEnterpriseVariableValue(TEST_REFERENCE_PERIOD, TEST_ENTERPRISE_REFERENCE_NUMBER, "name", "MyNewEnterpriseName");
 
         // Retrieve the updated Enterprise
-        Enterprise enterprise = assertEnterpriseExists();
+        Enterprise enterprise = validateReturnedEnterprise(controller.getEnterprise(TEST_REFERENCE_PERIOD, TEST_ENTERPRISE_REFERENCE_NUMBER));
 
+        assertEquals("Failure - invalid enterprise reference period", TEST_REFERENCE_PERIOD, enterprise.getReferencePeriod());
         assertEquals("Failure - invalid enterprise name", "MyNewEnterpriseName", enterprise.getVariables().get("name"));
     }
 
@@ -68,8 +77,9 @@ public class EnterpriseControllerIT extends AbstractHBaseIT {
         controller.updateEnterpriseVariableValues(TEST_REFERENCE_PERIOD, TEST_ENTERPRISE_REFERENCE_NUMBER, newValues);
 
         // Retrieve the updated Enterprise
-        Enterprise enterprise = assertEnterpriseExists();
+        Enterprise enterprise = validateReturnedEnterprise(controller.getEnterprise(TEST_REFERENCE_PERIOD, TEST_ENTERPRISE_REFERENCE_NUMBER));
 
+        assertEquals("Failure - invalid enterprise reference period", TEST_REFERENCE_PERIOD, enterprise.getReferencePeriod());
         assertEquals("Failure - invalid enterprise name", "MyNewEnterpriseName", enterprise.getVariables().get("name"));
         assertEquals("Failure - invalid enterprise employees", "10", enterprise.getVariables().get("employees"));
         assertEquals("Failure - invalid enterprise turnover", "101000", enterprise.getVariables().get("turnover"));
@@ -77,11 +87,9 @@ public class EnterpriseControllerIT extends AbstractHBaseIT {
 
     }
 
-    private Enterprise assertEnterpriseExists() throws IOException {
-        Optional<Enterprise> optEnt = controller.getEnterprise(TEST_REFERENCE_PERIOD, TEST_ENTERPRISE_REFERENCE_NUMBER);
+    private Enterprise validateReturnedEnterprise(Optional<Enterprise> optEnt) throws IOException {
         assertTrue("Failure - no enterprise found", optEnt.isPresent());
         Enterprise enterprise = optEnt.get();
-        assertEquals("Failure - invalid enterprise reference period", TEST_REFERENCE_PERIOD, enterprise.getReferencePeriod());
         assertEquals("Failure - invalid enterprise reference number", TEST_ENTERPRISE_REFERENCE_NUMBER, enterprise.getKey());
         return enterprise;
     }

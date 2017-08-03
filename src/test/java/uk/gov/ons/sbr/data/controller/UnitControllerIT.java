@@ -1,14 +1,9 @@
 package uk.gov.ons.sbr.data.controller;
 
-import org.apache.hadoop.hbase.util.Bytes;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import uk.gov.ons.sbr.data.domain.Unit;
 import uk.gov.ons.sbr.data.domain.UnitType;
 import uk.gov.ons.sbr.data.hbase.AbstractHBaseIT;
-import uk.gov.ons.sbr.data.hbase.HBaseConfig;
-import uk.gov.ons.sbr.data.hbase.dao.HBaseEnterpriseDAO;
-import uk.gov.ons.sbr.data.hbase.dao.HBaseUnitDAO;
 
 import java.time.Month;
 import java.time.YearMonth;
@@ -33,13 +28,13 @@ public class UnitControllerIT extends AbstractHBaseIT {
         Map<UnitType, String> parents = new HashMap<>();
         parents.put(UnitType.ENTERPRISE, TEST_ENTERPRISE_REFERENCE_NUMBER);
         String children =  "{ch: '43546583', vat: [658873556378], paye: [567P784]}";
-        controller = new UnitController(new HBaseConfig(getHBaseTestingUtility().getConfiguration()));
+        controller = new UnitController();
         controller.updateUnitLinks(TEST_REFERENCE_PERIOD, TEST_KEY, UnitType.LEGAL_UNIT, parents, children);
 
         // Put 2nd test unit with enterprise key +1
         parents = new HashMap<>();
         parents.put(UnitType.ENTERPRISE, TEST_ENTERPRISE_REFERENCE_NUMBER);
-        controller = new UnitController(new HBaseConfig(getHBaseTestingUtility().getConfiguration()));
+        controller = new UnitController();
         controller.updateUnitLinks(TEST_REFERENCE_PERIOD, String.valueOf(Integer.valueOf(TEST_KEY)+1), UnitType.LEGAL_UNIT, parents, children);
 
         // Find Unit
