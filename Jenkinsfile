@@ -2,7 +2,7 @@ pipeline {
     agent any
 	environment {
         ENV = "dev"
-        HBASE_CONNECTOR_DIR = "/$ENV/sbr-hbase-connector/lib"
+        HBASE_CONNECTOR_DIR = "$ENV/sbr-hbase-connector/lib"
     }
     stages {
         stage('Build') {
@@ -20,9 +20,10 @@ pipeline {
                 sh 'mvn integration-test'
             }
         }
-		stage('Deploy') {
+	stage('Deploy') {
             steps {
-				sh 'mvn package assembly:single'
+		sh 'mvn package assembly:single'
+		copyToHBaseNode()
             }
         }
     }
@@ -39,7 +40,7 @@ def copyToHBaseNode() {
         withCredentials([string(credentialsId: "sbr-hbase-node", variable: 'HBASE_NODE')]) {
             sh '''
                     ssh sbr-$ENV-ci@$HBASE_NODE mkdir -p $HBASE_CONNECTOR_DIR
-                    scp ${WORKSPACE}/target/*-distribution.jar sbr-dev-ci@$HOST:$HBASE_CONNECTOR_DIR
+                    scp ${WORKSPACE}/target/*-distribution.jar sbr-$ENV-ci@$HBASE_NODE:$HBASE_CONNECTOR_DIR
 					echo "Successfully copied jar files to $HBASE_CONNECTOR_DIR directory on $HBASE_NODE"
                  '''
         }
