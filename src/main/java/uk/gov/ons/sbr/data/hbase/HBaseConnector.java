@@ -38,10 +38,6 @@ public class HBaseConnector {
         return instance;
     }
 
-    private HBaseConnector() {
-        this.setConfiguration(HBaseConfiguration.create());
-    }
-
     public void setConfiguration(Configuration configuration) {
         this.configuration = configuration;
     }
@@ -50,15 +46,17 @@ public class HBaseConnector {
         // Configure HBase
         String hbaseSite = System.getProperty(HBASE_SITE_XML);
         if (hbaseSite == null) {
-            LOG.debug("No system property '{}' set so using default hbase-site.xml", HBASE_SITE_XML);
-            configuration.addResource("/src/main/resources/hbase-site.xml");
+            configuration = HBaseConfiguration.create();
+            LOG.debug("No system property '{}' set so using default configuration", HBASE_SITE_XML);
         } else {
             File hbaseSiteFile = new File(hbaseSite);
-            if (!hbaseSiteFile.exists()) {
-                LOG.warn("No hbase-site.xml file found at '{}'", hbaseSite);
-            } else {
+            if (hbaseSiteFile.exists()) {
                 LOG.debug("Using settings from hbase-site.xml file at '{}'", hbaseSite);
+                configuration = new Configuration();
                 configuration.addResource(hbaseSite);
+            } else {
+                configuration = HBaseConfiguration.create();
+                LOG.warn("No hbase-site.xml file found at '{}' so using default configuration", hbaseSite);
             }
         }
 
