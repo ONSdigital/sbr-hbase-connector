@@ -89,9 +89,6 @@ public class HBaseConnector {
                 // Point to the krb5.conf file.
                 System.setProperty(JAVA_SECURITY_KRB5_CONF, krb5File.getPath());
 
-                // Enable debugging
-                System.setProperty(JAVA_KERBEROS_DEBUG, String.valueOf(LOG.isDebugEnabled()));
-
                 // Override these values by setting -DKERBEROS_PRINCIPAL and/or -DKERBEROS_KEYTAB
                 String principal = System.getProperty(KERBEROS_PRINCIPAL);
                 String keytabLocation = System.getProperty(KERBEROS_KEYTAB);
