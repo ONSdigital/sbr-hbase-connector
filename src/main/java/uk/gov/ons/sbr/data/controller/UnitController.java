@@ -32,7 +32,7 @@ public class UnitController {
         return unitLinksDAO.scanUnits(referencePeriod, unitReferenceNumber);
     }
 
-    void updateUnitLinks(YearMonth referencePeriod, String unitKey, UnitType type, Map<UnitType, String> parents, String childrenJsonAsString) throws IOException {
+    public void updateUnitLinks(YearMonth referencePeriod, String unitKey, UnitType type, Map<UnitType, String> parents, String childrenJsonAsString) throws IOException {
         UnitLinks updatedLinks = new UnitLinks(referencePeriod, unitKey);
         if (parents != null) {
             updatedLinks.setParents(parents);
