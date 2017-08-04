@@ -25,7 +25,6 @@ public class HBaseConnector {
     private static final String HBASE_CONFIGURATION_ZOOKEEPER_QUORUM = "hbase.zookeeper.quorum";
     private static final String HBASE_CONFIGURATION_ZOOKEEPER_CLIENTPORT = "hbase.zookeeper.property.clientPort";
     private static final String JAVA_SECURITY_KRB5_CONF = "java.security.krb5.conf";
-    private static final String JAVA_KERBEROS_DEBUG = "sun.security.krb5.debug";
 
     private static final Logger LOG = LoggerFactory.getLogger(HBaseConnector.class.getName());
     private Configuration configuration;
@@ -51,9 +50,9 @@ public class HBaseConnector {
         } else {
             File hbaseSiteFile = new File(hbaseSite);
             if (hbaseSiteFile.exists()) {
-                LOG.debug("Using settings from hbase-site.xml file at '{}'", hbaseSite);
+                LOG.debug("Using settings from hbase-site.xml file at '{}'", hbaseSiteFile.getPath());
                 configuration = new Configuration();
-                configuration.addResource(hbaseSite);
+                configuration.addResource(hbaseSiteFile.getPath());
             } else {
                 configuration = HBaseConfiguration.create();
                 LOG.warn("No hbase-site.xml file found at '{}' so using default configuration", hbaseSite);
@@ -125,6 +124,7 @@ public class HBaseConnector {
             }
         }
         // Initialize connection
+        configuration = HBaseConfiguration.create(configuration);
         getConnection();
     }
 
