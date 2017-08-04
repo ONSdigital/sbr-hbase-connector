@@ -12,6 +12,7 @@ import uk.gov.ons.sbr.data.hbase.table.TableNames;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 public class HBaseConnector {
 
@@ -48,7 +49,10 @@ public class HBaseConnector {
     public void connect() throws IOException {
         // Configure HBase
         String hbaseSite = System.getProperty(HBASE_SITE_XML);
-        if (hbaseSite != null) {
+        if (hbaseSite == null) {
+            LOG.debug("No system property '{}' set so using default hbase-site.xml", HBASE_SITE_XML);
+            configuration.addResource("/src/main/resources/hbase-site.xml");
+        } else {
             File hbaseSiteFile = new File(hbaseSite);
             if (!hbaseSiteFile.exists()) {
                 LOG.warn("No hbase-site.xml file found at '{}'", hbaseSite);
@@ -56,14 +60,13 @@ public class HBaseConnector {
                 LOG.debug("Using settings from hbase-site.xml file at '{}'", hbaseSite);
                 configuration.addResource(hbaseSite);
             }
-        } else {
-            LOG.debug("No system property '{}' set so using default hbase-site.xml", HBASE_SITE_XML);
-            configuration.addResource("/src/main/resources/hbase-site.xml");
         }
 
         // Authentication required?
         String krb5 = System.getProperty(KRB5_CONF);
-        if (krb5 != null) {
+        if (krb5 == null) {
+            LOG.debug("No system property '{}' set so skipping Kerberos authentication.", KRB5_CONF);
+        } else {
             File krb5File = new File(krb5);
             if (krb5File.exists()) {
                 LOG.debug("Found krb5.conf file '{}' so performing Kerberos authentication...", krb5File.getPath());
@@ -108,20 +111,23 @@ public class HBaseConnector {
                 }
 
                 // Login
-                UserGroupInformation.setConfiguration(configuration);
-                try {
-                    UserGroupInformation.loginUserFromKeytab(principal, keytabLocation);
-                    LOG.info("Kerberos authentication successful for user '{}' using keytab file '{}'", principal, keytabLocation);
-                } catch (IOException e) {
-                    LOG.error("Kerberos authentication failed for user '{}' using keytab file '{}'", principal, keytabLocation, e);
-                    throw e;
+                if (principal != null && keytabLocation != null) {
+                    UserGroupInformation.setConfiguration(configuration);
+                    try {
+                        UserGroupInformation ugi = UserGroupInformation.loginUserFromKeytabAndReturnUGI(principal, keytabLocation);
+                        LOG.info("Kerberos authentication successful for user '{}' using keytab file '{}'", principal, keytabLocation);
+                        LOG.debug("User: '{}'", ugi.getUserName());
+                        String[] groups = ugi.getGroupNames();
+                        LOG.debug("Groups: ");
+                        Arrays.stream(groups).forEach(group -> LOG.debug("'{}' ", group));
+                    } catch (IOException e) {
+                        LOG.error("Kerberos authentication failed for user '{}' using keytab file '{}'", principal, keytabLocation, e);
+                        throw e;
+                    }
                 }
             } else {
                 LOG.warn("No krb5.conf file found at '{}' so skipping Kerberos authentication.", krb5);
             }
-        } else {
-            LOG.debug("No system property '{}' set so skipping Kerberos authentication.", KRB5_CONF);
-
         }
         // Initialize connection
         getConnection();
@@ -158,9 +164,9 @@ public class HBaseConnector {
         HBaseAdmin hbaseAdmin = new HBaseAdmin(configuration);
         for (TableNames tableName : TableNames.values()) {
             if (hbaseAdmin.tableExists(tableName.getTableName())) {
-                LOG.info("{} table exists", tableName.getTableName().getNameAsString());
+                LOG.info("{}' table exists", tableName.getTableName().getNameAsString());
             } else {
-                LOG.error("{} table does not exist!", tableName.getTableName().getNameAsString());
+                LOG.error("{}' table does not exist!", tableName.getTableName().getNameAsString());
                 isValid = false;
             }
         }
