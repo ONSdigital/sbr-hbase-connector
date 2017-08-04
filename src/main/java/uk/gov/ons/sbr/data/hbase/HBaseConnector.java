@@ -21,7 +21,7 @@ public class HBaseConnector {
     private static final String KERBEROS_KEYTAB = "KERBEROS_KEYTAB";
     private static final String HBASE_CONFIGURATION_ZOOKEEPER_QUORUM = "hbase.zookeeper.quorum";
     private static final String HBASE_CONFIGURATION_ZOOKEEPER_CLIENTPORT = "hbase.zookeeper.property.clientPort";
-    private static final String KRB5_CONF = "src/main/resources/krb5.conf";
+    private static final String KRB5_CONF = "src/main/resources/conf/krb5.conf";
     private static final String JAVA_SECURITY_KRB5_CONF = "java.security.krb5.conf";
     private static final String JAVA_KERBEROS_DEBUG = "sun.security.krb5.debug";
 
@@ -44,8 +44,8 @@ public class HBaseConnector {
         this.configuration = configuration;
     }
 
-    public void authenticate() {
-        configuration.addResource("src/main/resources/hbase-site.xml");
+    public void connect() {
+        configuration.addResource("src/main/resources/conf/hbase-site.xml");
 
         File krb5 = new File(KRB5_CONF);
         if (krb5.exists()) {
@@ -148,7 +148,7 @@ public class HBaseConnector {
     }
 
     public static void main(String[] args) throws IOException {
-        HBaseConnector.getInstance().authenticate();
+        HBaseConnector.getInstance().connect();
         HBaseConnector.getInstance().validateSchema();
     }
 
