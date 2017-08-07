@@ -129,7 +129,7 @@ public class HBaseConnector {
     }
 
     private void logSystemPropertyFound(String key, String value) {
-        LOG.debug("System property found for '{}' with value '{}", key, value);
+        LOG.debug("System property found for '{}' with value '{}'", key, value);
     }
 
     private void logSystemPropertyNotFound(String key) {
