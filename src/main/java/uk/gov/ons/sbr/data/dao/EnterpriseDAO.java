@@ -1,0 +1,17 @@
+package uk.gov.ons.sbr.data.dao;
+
+import uk.gov.ons.sbr.data.domain.Enterprise;
+
+import java.io.IOException;
+import java.time.YearMonth;
+import java.util.Optional;
+
+/**
+ * Definition of an Enterprise DAO
+ */
+public interface EnterpriseDAO {
+
+    Optional<Enterprise> getEnterprise(YearMonth referencePeriod, String key) throws IOException;
+
+    void putEnterprise(Enterprise enterprise) throws IOException;
+}
