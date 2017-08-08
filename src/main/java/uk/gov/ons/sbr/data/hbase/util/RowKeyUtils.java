@@ -1,9 +1,6 @@
 package uk.gov.ons.sbr.data.hbase.util;
 
-import uk.gov.ons.sbr.data.domain.CompanyRegistration;
-import uk.gov.ons.sbr.data.domain.Enterprise;
-import uk.gov.ons.sbr.data.domain.Unit;
-import uk.gov.ons.sbr.data.domain.UnitType;
+import uk.gov.ons.sbr.data.domain.*;
 
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
@@ -41,26 +38,18 @@ public class RowKeyUtils {
         return String.join(DELIMETER, rowKeyParts);
     }
 
-    public static Enterprise createEnterpriseFromRowKey(String rowKey) {
+    @SuppressWarnings("unchecked")
+    public static <T extends StatisticalUnit> T createUnitFromRowKey(String rowKey, UnitType unitType) {
         final String[] compositeRowKeyParts = RowKeyUtils.splitRowKey(rowKey);
         final YearMonth referencePeriod = YearMonth.parse(compositeRowKeyParts[0], DateTimeFormatter.ofPattern(REFERENCE_PERIOD_FORMAT));
         final String key = compositeRowKeyParts[1];
-        return new Enterprise(referencePeriod, key);
+        StatisticalUnit statisticalUnit = StatisticalUnitFactory.getUnit(unitType, referencePeriod, key);
+        return (T)statisticalUnit;
     }
 
-    public static CompanyRegistration createCompanyRegistrationFromRowKey(String rowKey) {
+    public static StatisticalUnit createUnitOfUnknownTypeFromRowKey(String rowKey) {
         final String[] compositeRowKeyParts = RowKeyUtils.splitRowKey(rowKey);
-        final YearMonth referencePeriod = YearMonth.parse(compositeRowKeyParts[0], DateTimeFormatter.ofPattern(REFERENCE_PERIOD_FORMAT));
-        final String key = compositeRowKeyParts[1];
-        return new CompanyRegistration(referencePeriod, key);
-    }
-
-    public static Unit createUnitFromRowKey(String rowKey) {
-
-        final String[] compositeRowKeyParts = RowKeyUtils.splitRowKey(rowKey);
-        final YearMonth referencePeriod = YearMonth.parse(compositeRowKeyParts[0], DateTimeFormatter.ofPattern(REFERENCE_PERIOD_FORMAT));
-        final String key = compositeRowKeyParts[1];
         final UnitType type = UnitType.fromString(compositeRowKeyParts[2]);
-        return new Unit(referencePeriod, key, type);
+        return createUnitFromRowKey(rowKey, type);
     }
 }

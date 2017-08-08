@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-public class UnitTypeTest {
+public class StatisticalUnitTypeTest {
     @Test
     public void toStringTest() throws Exception {
         assertEquals("Failure - invalid string value for enterprise", "ENT", UnitType.ENTERPRISE.toString());

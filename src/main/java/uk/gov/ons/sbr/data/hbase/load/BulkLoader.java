@@ -8,13 +8,17 @@ import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.hbase.mapreduce.HFileOutputFormat2;
 import org.apache.hadoop.hbase.mapreduce.LoadIncrementalHFiles;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import uk.gov.ons.sbr.data.domain.UnitType;
 import uk.gov.ons.sbr.data.hbase.HBaseConnector;
 import uk.gov.ons.sbr.data.hbase.table.TableNames;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 
 
 /**
@@ -23,25 +27,32 @@ import java.io.IOException;
  * <ol>
  * <li>args[0]: HDFS input path
  * <li>args[1]: HDFS output path
- * <li>args[2]: HBase table name
+ * <li>args[2]: unit type ("CH", "ENT", "VAT, "PAYE")
  * </ol>
  */
 public class BulkLoader {
     public static void main(String[] args) {
-        Connection connection = null;
-        Job job = null;
+        // Time job
+        Instant start = Instant.now();
+        Connection connection;
+        Job job;
         try {
+            UnitType unitType = UnitType.fromString(args[2]);
+            if (unitType.equals(UnitType.UNKNOWN)) {
+                System.out.println("Unknown unit type " + args[2]);
+                System.exit(1);
+            }
+            Class<? extends Mapper> mapper = KVMapperFactory.getKVMapper(unitType);
             HBaseConnector.getInstance().connect();
             connection = HBaseConnector.getInstance().getConnection();
             Configuration conf = HBaseConnector.getInstance().getConfiguration();
-            job = Job.getInstance(conf, "Companies House Bulk Import Example");
-            job.setJarByClass(CompanyDataKVMapper.class);
-            job.setMapperClass(CompanyDataKVMapper.class);
+            job = Job.getInstance(conf, "SBR Unit Data Import");
+            job.setJarByClass(mapper);
+            job.setMapperClass(mapper);
             job.setMapOutputKeyClass(ImmutableBytesWritable.class);
             job.setMapOutputValueClass(KeyValue.class);
             job.setInputFormatClass(TextInputFormat.class);
             job.setOutputFormatClass(HFileOutputFormat2.class);
-
 
             try (Table table = connection.getTable(TableNames.COMPANIES_HOUSE_DATA.getTableName())) {
                 RegionLocator regionLocator = connection.getRegionLocator(TableNames.COMPANIES_HOUSE_DATA.getTableName());
@@ -60,17 +71,17 @@ public class BulkLoader {
                         e.printStackTrace();
                     }
                 } else {
-                    System.out.println("Loading of companies house data failed.");
+                    System.out.println("Loading of data failed.");
                     System.exit(1);
                 }
             }
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException | ClassNotFoundException e) {
             e.printStackTrace();
             System.exit(1);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
         }
+
+        Instant end = Instant.now();
+        long seconds = Duration.between(start, end).getSeconds();
+        System.out.println(String.format("Data loaded in %d:%02d:%02d", seconds / 3600, (seconds % 3600) / 60, (seconds % 60)));
     }
 }

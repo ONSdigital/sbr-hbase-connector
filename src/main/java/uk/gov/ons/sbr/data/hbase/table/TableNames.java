@@ -2,6 +2,7 @@ package uk.gov.ons.sbr.data.hbase.table;
 
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.util.Bytes;
+import uk.gov.ons.sbr.data.domain.UnitType;
 
 /**
  * Enumeration of table names in the SBR schema.
@@ -21,4 +22,16 @@ public enum TableNames {
     public TableName getTableName() {
         return tableName;
     }
+
+    public static TableName forUnitType(UnitType type){
+        switch (type) {
+            case COMPANY_REGISTRATION:
+                return COMPANIES_HOUSE_DATA.getTableName();
+            case ENTERPRISE:
+                return ENTERPRISE.getTableName();
+            default:
+                return null;
+        }
+    }
+
 }

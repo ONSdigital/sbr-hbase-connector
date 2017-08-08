@@ -7,8 +7,8 @@ import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.ons.sbr.data.dao.UnitDAO;
-import uk.gov.ons.sbr.data.domain.Unit;
+import uk.gov.ons.sbr.data.dao.StatisticalUnitLinksDAO;
+import uk.gov.ons.sbr.data.domain.StatisticalUnit;
 import uk.gov.ons.sbr.data.domain.UnitLinks;
 import uk.gov.ons.sbr.data.domain.UnitType;
 import uk.gov.ons.sbr.data.hbase.table.ColumnFamilies;
@@ -21,35 +21,35 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class HBaseUnitDAO extends AbstractHBaseDAO implements UnitDAO {
+public class HBaseStatisticalUnitLinksDAO extends AbstractHBaseDAO implements StatisticalUnitLinksDAO {
 
     private static final TableName UNIT_LINKS_TABLE = TableNames.UNIT_LINKS.getTableName();
     private static final byte[] UNIT_LINKS_CF = ColumnFamilies.UNIT_LINKS_DATA.getColumnFamily();
     private static final String CHILDREN_COLUMN = "children";
     private static final String PARENT_COLUMN_PREFIX = "p_";
-    private static final Logger LOG = LoggerFactory.getLogger(HBaseUnitDAO.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(HBaseStatisticalUnitLinksDAO.class.getName());
 
     @Override
-    public Optional<List<Unit>> scanUnits(YearMonth referencePeriod, String key) throws IOException {
+    public Optional<List<StatisticalUnit>> scanUnits(YearMonth referencePeriod, String key) throws IOException {
         LOG.debug("Searching for units for reference period '{}' and key '{}'", referencePeriod, key);
         String partialRowKey = RowKeyUtils.createRowKey(referencePeriod, key);
-        Optional<List<Unit>> matchingUnits;
+        Optional<List<StatisticalUnit>> matchingUnits;
         try (Table table = getConnection().getTable(UNIT_LINKS_TABLE)) {
             byte[] prefix = Bytes.toBytes(partialRowKey);
             Scan scan = new Scan(prefix);
             scan.addFamily(UNIT_LINKS_CF);
             scan.setRowPrefixFilter(prefix);
             try (ResultScanner results = table.getScanner(scan)) {
-                List<Unit> units = new ArrayList<>();
+                List<StatisticalUnit> statisticalUnits = new ArrayList<>();
                 results.forEach((Result result) -> {
                     String rowKey = Bytes.toString(result.getRow());
                     LOG.debug("Found unit with key '{}' matching partial row key '{}'", rowKey, partialRowKey);
-                    Unit unit = RowKeyUtils.createUnitFromRowKey(rowKey);
-                    unit.setLinks(convertToUnitLinks(referencePeriod, key, result));
-                    units.add(unit);
+                    StatisticalUnit statisticalUnit = RowKeyUtils.createUnitOfUnknownTypeFromRowKey(rowKey);
+                    statisticalUnit.setLinks(convertToUnitLinks(referencePeriod, key, result));
+                    statisticalUnits.add(statisticalUnit);
                 });
-                LOG.debug("Total units found matching partial row key '{}' is {}", partialRowKey, units.size());
-                matchingUnits = Optional.of(units);
+                LOG.debug("Total units found matching partial row key '{}' is {}", partialRowKey, statisticalUnits.size());
+                matchingUnits = Optional.of(statisticalUnits);
             }
         } catch (IOException e) {
             LOG.error("Error getting enterprise data for partial row key '{}'", partialRowKey, e);

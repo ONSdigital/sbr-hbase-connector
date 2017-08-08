@@ -1,8 +1,8 @@
 package uk.gov.ons.sbr.data.controller;
 
-import uk.gov.ons.sbr.data.dao.CompanyRegistrationDAO;
+import uk.gov.ons.sbr.data.dao.AdminDataDAO;
 import uk.gov.ons.sbr.data.domain.CompanyRegistration;
-import uk.gov.ons.sbr.data.hbase.dao.HBaseCompanyRegistrationDAO;
+import uk.gov.ons.sbr.data.hbase.dao.HBaseAdminDataDAO;
 import uk.gov.ons.sbr.data.hbase.util.ReferencePeriodUtils;
 
 import java.io.IOException;
@@ -12,12 +12,12 @@ import java.util.Optional;
 /**
  * Provides read and update access to the SBR Enterprise operational data
  */
-public class CompanyRegistrationController {
+public class AdminDataController {
 
-    private CompanyRegistrationDAO companyRegistrationDAO;
+    private AdminDataDAO adminDataDAO;
 
-    public CompanyRegistrationController() {
-        this.companyRegistrationDAO = new HBaseCompanyRegistrationDAO();
+    public AdminDataController() {
+        this.adminDataDAO = new HBaseAdminDataDAO();
     }
 
     public Optional<CompanyRegistration> getCompanyRegistration(String enterpriseReferenceNumber) throws IOException {
@@ -25,7 +25,7 @@ public class CompanyRegistrationController {
     }
 
     public Optional<CompanyRegistration> getCompanyRegistrationForReferencePeriod(YearMonth referencePeriod, String companyRegistrationNumber) throws IOException {
-        return companyRegistrationDAO.getCompanyRegistration(referencePeriod, companyRegistrationNumber);
+        return adminDataDAO.getCompanyRegistration(referencePeriod, companyRegistrationNumber);
     }
 
 }

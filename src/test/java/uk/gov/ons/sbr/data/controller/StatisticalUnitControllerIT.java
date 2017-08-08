@@ -1,7 +1,7 @@
 package uk.gov.ons.sbr.data.controller;
 
 import org.junit.Test;
-import uk.gov.ons.sbr.data.domain.Unit;
+import uk.gov.ons.sbr.data.domain.StatisticalUnit;
 import uk.gov.ons.sbr.data.domain.UnitType;
 import uk.gov.ons.sbr.data.hbase.AbstractHBaseIT;
 
@@ -15,7 +15,7 @@ import java.util.Optional;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class UnitControllerIT extends AbstractHBaseIT {
+public class StatisticalUnitControllerIT extends AbstractHBaseIT {
 
     private static final YearMonth TEST_REFERENCE_PERIOD = YearMonth.of(2017, Month.JUNE);
     private static final String TEST_ENTERPRISE_REFERENCE_NUMBER = "123456789";
@@ -38,17 +38,17 @@ public class UnitControllerIT extends AbstractHBaseIT {
         controller.updateUnitLinks(TEST_REFERENCE_PERIOD, String.valueOf(Integer.valueOf(TEST_KEY)+1), UnitType.LEGAL_UNIT, parents, children);
 
         // Find Unit
-        Optional<List<Unit>> matchingUnits = controller.findUnits(TEST_REFERENCE_PERIOD, TEST_KEY);
+        Optional<List<StatisticalUnit>> matchingUnits = controller.findUnits(TEST_REFERENCE_PERIOD, TEST_KEY);
         assertTrue("Failure - unit should be found", matchingUnits.isPresent());
         assertEquals("Failure - 1 matching unit should be found", 1, matchingUnits.get().size());
 
         // Validate returned unit
-        Unit matchingUnit = matchingUnits.get().iterator().next();
-        assertEquals("Failure - invalid reference period", TEST_REFERENCE_PERIOD, matchingUnit.getReferencePeriod());
-        assertEquals("Failure - invalid unit key", TEST_KEY, matchingUnit.getKey());
-        assertEquals("Failure - invalid unit type", UnitType.LEGAL_UNIT, matchingUnit.getType());
-        assertEquals("Failure - invalid unit type", parents, matchingUnit.getLinks().getParents());
-        assertEquals("Failure - invalid children Json string", children, matchingUnit.getLinks().getChildJsonString());
+        StatisticalUnit matchingStatisticalUnit = matchingUnits.get().iterator().next();
+        assertEquals("Failure - invalid reference period", TEST_REFERENCE_PERIOD, matchingStatisticalUnit.getReferencePeriod());
+        assertEquals("Failure - invalid unit key", TEST_KEY, matchingStatisticalUnit.getKey());
+        assertEquals("Failure - invalid unit type", UnitType.LEGAL_UNIT, matchingStatisticalUnit.getType());
+        assertEquals("Failure - invalid unit type", parents, matchingStatisticalUnit.getLinks().getParents());
+        assertEquals("Failure - invalid children Json string", children, matchingStatisticalUnit.getLinks().getChildJsonString());
 
         // Put 2nd test unit for same enterprise and reference period
         parents = new HashMap<>();

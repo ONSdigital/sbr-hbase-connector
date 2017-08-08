@@ -1,6 +1,8 @@
 package uk.gov.ons.sbr.data.domain;
 
 import java.time.YearMonth;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Represents a definition of an statistical unit for a reference period i.e. a year and month
@@ -8,19 +10,33 @@ import java.time.YearMonth;
  *
  * @see UnitType
  */
-public class Unit extends AbstractPeriodEntity {
+public class StatisticalUnit extends AbstractPeriodEntity {
 
     private UnitType type;
+    private Map<String, String> variables;
     private UnitLinks links;
 
-    public Unit(YearMonth referencePeriod, String key, UnitType type) {
+    public StatisticalUnit(YearMonth referencePeriod, String key, UnitType type) {
         super(referencePeriod, key);
         this.type = type;
+        this.variables = new HashMap<>();
         this.links = new UnitLinks(referencePeriod, key);
     }
 
     public UnitType getType() {
         return type;
+    }
+
+    public Map<String, String> getVariables() {
+        return variables;
+    }
+
+    public void putVariable(String variable, String value) {
+        this.variables.put(variable, value);
+    }
+
+    public void putVariables(Map<String, String> newVariables) {
+        this.variables.putAll(newVariables);
     }
 
     public UnitLinks getLinks() {

@@ -1,7 +1,5 @@
 package uk.gov.ons.sbr.data.domain;
 
-import org.omg.CORBA.UNKNOWN;
-
 /**
  * Unit types
  */
