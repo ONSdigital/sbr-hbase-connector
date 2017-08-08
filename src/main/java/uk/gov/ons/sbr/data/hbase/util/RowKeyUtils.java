@@ -1,5 +1,6 @@
 package uk.gov.ons.sbr.data.hbase.util;
 
+import uk.gov.ons.sbr.data.domain.CompanyRegistration;
 import uk.gov.ons.sbr.data.domain.Enterprise;
 import uk.gov.ons.sbr.data.domain.Unit;
 import uk.gov.ons.sbr.data.domain.UnitType;
@@ -45,6 +46,13 @@ public class RowKeyUtils {
         final YearMonth referencePeriod = YearMonth.parse(compositeRowKeyParts[0], DateTimeFormatter.ofPattern(REFERENCE_PERIOD_FORMAT));
         final String key = compositeRowKeyParts[1];
         return new Enterprise(referencePeriod, key);
+    }
+
+    public static CompanyRegistration createCompanyRegistrationFromRowKey(String rowKey) {
+        final String[] compositeRowKeyParts = RowKeyUtils.splitRowKey(rowKey);
+        final YearMonth referencePeriod = YearMonth.parse(compositeRowKeyParts[0], DateTimeFormatter.ofPattern(REFERENCE_PERIOD_FORMAT));
+        final String key = compositeRowKeyParts[1];
+        return new CompanyRegistration(referencePeriod, key);
     }
 
     public static Unit createUnitFromRowKey(String rowKey) {

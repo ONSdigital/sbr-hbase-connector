@@ -8,6 +8,7 @@ import org.apache.hadoop.hbase.util.Bytes;
  */
 public enum TableNames {
 
+    COMPANIES_HOUSE_DATA("ch"),
     ENTERPRISE("enterprise"),
     UNIT_LINKS("unit_links");
 

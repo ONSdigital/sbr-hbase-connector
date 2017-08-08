@@ -28,10 +28,10 @@ public class EnterpriseController {
     }
 
     public Optional<Enterprise> getEnterprise(String enterpriseReferenceNumber) throws IOException {
-        return getEnterprise(ReferencePeriodUtils.getCurrentPeriod(), enterpriseReferenceNumber);
+        return getEnterpriseForReferencePeriod(ReferencePeriodUtils.getCurrentPeriod(), enterpriseReferenceNumber);
     }
 
-    public Optional<Enterprise> getEnterprise(YearMonth referencePeriod, String enterpriseReferenceNumber) throws IOException {
+    public Optional<Enterprise> getEnterpriseForReferencePeriod(YearMonth referencePeriod, String enterpriseReferenceNumber) throws IOException {
         Optional<Enterprise> enterprise = enterpriseDAO.getEnterprise(referencePeriod, enterpriseReferenceNumber);
         if (enterprise.isPresent()) {
             Optional<UnitLinks> links = unitLinksDAO.getUnitLinks(referencePeriod, enterpriseReferenceNumber, UnitType.ENTERPRISE);

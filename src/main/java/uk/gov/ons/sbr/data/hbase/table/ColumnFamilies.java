@@ -8,6 +8,7 @@ import org.apache.hadoop.hbase.util.Bytes;
  */
 public enum ColumnFamilies {
 
+    COMPANY_DATA("d"),
     ENTERPRISE_DATA("d"),
     UNIT_LINKS_DATA("d");
 

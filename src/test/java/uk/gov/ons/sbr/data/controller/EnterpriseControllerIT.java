@@ -56,7 +56,7 @@ public class EnterpriseControllerIT extends AbstractHBaseIT {
         controller.updateEnterpriseVariableValue(TEST_REFERENCE_PERIOD, TEST_ENTERPRISE_REFERENCE_NUMBER, "name", "MyNewEnterpriseName");
 
         // Retrieve the updated Enterprise
-        Enterprise enterprise = validateReturnedEnterprise(controller.getEnterprise(TEST_REFERENCE_PERIOD, TEST_ENTERPRISE_REFERENCE_NUMBER));
+        Enterprise enterprise = validateReturnedEnterprise(controller.getEnterpriseForReferencePeriod(TEST_REFERENCE_PERIOD, TEST_ENTERPRISE_REFERENCE_NUMBER));
 
         assertEquals("Failure - invalid enterprise reference period", TEST_REFERENCE_PERIOD, enterprise.getReferencePeriod());
         assertEquals("Failure - invalid enterprise name", "MyNewEnterpriseName", enterprise.getVariables().get("name"));
@@ -77,7 +77,7 @@ public class EnterpriseControllerIT extends AbstractHBaseIT {
         controller.updateEnterpriseVariableValues(TEST_REFERENCE_PERIOD, TEST_ENTERPRISE_REFERENCE_NUMBER, newValues);
 
         // Retrieve the updated Enterprise
-        Enterprise enterprise = validateReturnedEnterprise(controller.getEnterprise(TEST_REFERENCE_PERIOD, TEST_ENTERPRISE_REFERENCE_NUMBER));
+        Enterprise enterprise = validateReturnedEnterprise(controller.getEnterpriseForReferencePeriod(TEST_REFERENCE_PERIOD, TEST_ENTERPRISE_REFERENCE_NUMBER));
 
         assertEquals("Failure - invalid enterprise reference period", TEST_REFERENCE_PERIOD, enterprise.getReferencePeriod());
         assertEquals("Failure - invalid enterprise name", "MyNewEnterpriseName", enterprise.getVariables().get("name"));
