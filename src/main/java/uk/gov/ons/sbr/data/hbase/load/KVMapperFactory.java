@@ -9,6 +9,8 @@ public class KVMapperFactory {
         switch (unitType) {
             case COMPANY_REGISTRATION:
                 return CompaniesHouseDataKVMapper.class;
+            case ENTERPRISE:
+                return EnterpriseDataKVMapper.class;
             default:
                 return null;
         }

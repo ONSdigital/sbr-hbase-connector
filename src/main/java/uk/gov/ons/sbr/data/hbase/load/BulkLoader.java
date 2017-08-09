@@ -3,6 +3,7 @@ package uk.gov.ons.sbr.data.hbase.load;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.KeyValue;
+import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.hbase.mapreduce.HFileOutputFormat2;
@@ -42,6 +43,7 @@ public class BulkLoader {
                 System.out.println("Unknown unit type " + args[2]);
                 System.exit(1);
             }
+            TableName tableName = TableNames.forUnitType(unitType);
             Class<? extends Mapper> mapper = KVMapperFactory.getKVMapper(unitType);
             HBaseConnector.getInstance().connect();
             connection = HBaseConnector.getInstance().getConnection();
@@ -54,8 +56,8 @@ public class BulkLoader {
             job.setInputFormatClass(TextInputFormat.class);
             job.setOutputFormatClass(HFileOutputFormat2.class);
 
-            try (Table table = connection.getTable(TableNames.COMPANIES_HOUSE_DATA.getTableName())) {
-                RegionLocator regionLocator = connection.getRegionLocator(TableNames.COMPANIES_HOUSE_DATA.getTableName());
+            try (Table table = connection.getTable(tableName)) {
+                RegionLocator regionLocator = connection.getRegionLocator(tableName);
                 // Auto configure partitioner and reducer
                 HFileOutputFormat2.configureIncrementalLoad(job, table, regionLocator);
 

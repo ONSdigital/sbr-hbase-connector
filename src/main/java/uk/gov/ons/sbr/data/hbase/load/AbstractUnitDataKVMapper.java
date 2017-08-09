@@ -16,6 +16,9 @@ import uk.gov.ons.sbr.data.hbase.util.RowKeyUtils;
 import java.io.IOException;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * hbase org.apache.hadoop.hbase.mapreduce.ImportTsv -Dimporttsv.separator=, -Dimporttsv.mapper.class=my.Mapper
@@ -40,9 +43,15 @@ public abstract class AbstractUnitDataKVMapper extends
 
     protected abstract int getRowKeyFieldPosition();
 
+    protected boolean useCsvHeaderAsColumnNames() {
+        return false;
+    }
+
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
-        columnNames = ColumnNames.forUnitType(getUnitType());
+        if (!useCsvHeaderAsColumnNames()) {
+            columnNames = ColumnNames.forUnitType(getUnitType());
+        }
         columnFamily = ColumnFamilies.forUnitType(getUnitType());
         String periodStr = System.getProperty(REFERENCE_PERIOD);
         try {
@@ -55,9 +64,21 @@ public abstract class AbstractUnitDataKVMapper extends
     }
 
     @Override
-    protected void map(LongWritable key, Text value, Context context) throws InterruptedException {
+    protected void map(LongWritable key, Text value, Context context) throws InterruptedException, IOException {
 
         if (value.find(getHeaderString()) > -1) {
+            LOG.debug("Found header row: {}", value.toString());
+            if (useCsvHeaderAsColumnNames()) {
+                LOG.debug("Using header row as table column names");
+                try {
+                    String[] columnNameStrs = csvParser.parseLine(value.toString());
+                    List<byte[]> byteList = Arrays.stream(columnNameStrs).map(String::getBytes).collect(Collectors.toList());
+                    columnNames = byteList.toArray(new byte[0][0]);
+                } catch (Exception e) {
+                    LOG.error("Cannot parse column headers, error is: {}", e);
+                    throw e;
+                }
+            }
             // Skip header
             return;
         }
@@ -65,7 +86,7 @@ public abstract class AbstractUnitDataKVMapper extends
         String[] fields;
         try {
             fields = csvParser.parseLine(value.toString());
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOG.error("Cannot parse line '{}', error is: {}", value.toString(), e.getMessage());
             context.getCounter(this.getClass().getSimpleName(), "PARSE_ERRORS").increment(1);
             return;
@@ -81,13 +102,10 @@ public abstract class AbstractUnitDataKVMapper extends
 
         for (int i = 0; i < fields.length; i++) {
             if (!fields[i].isEmpty()) {
-                kv = new KeyValue(rowKey.get(), columnFamily, columnNames[i], fields[i].getBytes());
                 try {
+                    kv = new KeyValue(rowKey.get(), columnFamily, columnNames[i], fields[i].getBytes());
                     context.write(rowKey, kv);
-                } catch (IOException e) {
-                    LOG.error("Cannot write line '{}'", value.toString(), e);
-                    return;
-                } catch (InterruptedException e) {
+                } catch (Exception e) {
                     LOG.error("Cannot write line '{}'", value.toString(), e);
                     throw e;
                 }
