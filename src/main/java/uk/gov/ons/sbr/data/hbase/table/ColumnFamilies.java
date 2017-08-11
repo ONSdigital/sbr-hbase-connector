@@ -11,7 +11,9 @@ public enum ColumnFamilies {
 
     COMPANY_DATA("d"),
     ENTERPRISE_DATA("d"),
-    UNIT_LINKS_DATA("d");
+    PAYE_DATA("d"),
+    UNIT_LINKS_DATA("d"),
+    VAT_DATA("d");
 
     private byte[] columnFamily;
 
@@ -29,6 +31,10 @@ public enum ColumnFamilies {
                 return COMPANY_DATA.getColumnFamily();
             case ENTERPRISE:
                 return ENTERPRISE_DATA.getColumnFamily();
+            case PAYE:
+                return PAYE_DATA.getColumnFamily();
+            case VAT:
+                return VAT_DATA.getColumnFamily();
             default:
                 return null;
         }

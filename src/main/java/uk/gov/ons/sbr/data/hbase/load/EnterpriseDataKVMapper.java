@@ -5,11 +5,6 @@ import uk.gov.ons.sbr.data.domain.UnitType;
 public class EnterpriseDataKVMapper extends AbstractUnitDataKVMapper {
 
     @Override
-    protected boolean useCsvHeaderAsColumnNames() {
-        return true;
-    }
-
-    @Override
     protected UnitType getUnitType() {
         return UnitType.ENTERPRISE;
     }
