@@ -2,6 +2,7 @@ package uk.gov.ons.sbr.data.hbase;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.client.Admin;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
@@ -39,6 +40,10 @@ public class HBaseConnector {
 
     public void setConfiguration(Configuration configuration) {
         this.configuration = configuration;
+    }
+
+    public Configuration getConfiguration() {
+        return configuration;
     }
 
     public void connect() throws IOException {
@@ -156,13 +161,14 @@ public class HBaseConnector {
     private void validateSchema() throws IOException {
         LOG.info("Validating schema...");
         boolean isValid = true;
-        HBaseAdmin hbaseAdmin = new HBaseAdmin(configuration);
-        for (TableNames tableName : TableNames.values()) {
-            if (hbaseAdmin.tableExists(tableName.getTableName())) {
-                LOG.info("{}' table exists", tableName.getTableName().getNameAsString());
-            } else {
-                LOG.error("{}' table does not exist!", tableName.getTableName().getNameAsString());
-                isValid = false;
+        try (Admin hbaseAdmin = HBaseConnector.getInstance().getConnection().getAdmin()) {
+            for (TableNames tableName : TableNames.values()) {
+                if (hbaseAdmin.tableExists(tableName.getTableName())) {
+                    LOG.info("{}' table exists", tableName.getTableName().getNameAsString());
+                } else {
+                    LOG.error("{}' table does not exist!", tableName.getTableName().getNameAsString());
+                    isValid = false;
+                }
             }
         }
         if (isValid) {

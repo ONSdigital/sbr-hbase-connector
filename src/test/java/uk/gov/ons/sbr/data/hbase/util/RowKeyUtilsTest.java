@@ -2,7 +2,7 @@ package uk.gov.ons.sbr.data.hbase.util;
 
 import org.junit.Test;
 import uk.gov.ons.sbr.data.domain.Enterprise;
-import uk.gov.ons.sbr.data.domain.Unit;
+import uk.gov.ons.sbr.data.domain.StatisticalUnit;
 import uk.gov.ons.sbr.data.domain.UnitType;
 
 import java.time.YearMonth;
@@ -39,17 +39,17 @@ public class RowKeyUtilsTest {
     }
 
     @Test
-    public void  createEnterpriseFromRowKey() throws Exception {
-        Enterprise enterprise = RowKeyUtils.createEnterpriseFromRowKey(TEST_ENTERPRISE_ROWKEY);
+    public void  createUnitFromRowKey() throws Exception {
+        Enterprise enterprise = RowKeyUtils.createUnitFromRowKey(TEST_ENTERPRISE_ROWKEY, UnitType.ENTERPRISE);
         assertEquals("Failure - key not the same", TEST_KEY, enterprise.getKey());
         assertEquals("Failure - reference period not the same", TEST_REFERENCE_PERIOD, enterprise.getReferencePeriod());
     }
 
     @Test
-    public void createUnitFromRowKey() throws Exception {
-        Unit unit = RowKeyUtils.createUnitFromRowKey(TEST_UNIT_ROWKEY);
-        assertEquals("Failure - key not the same", TEST_KEY, unit.getKey());
-        assertEquals("Failure - reference period not the same", TEST_REFERENCE_PERIOD, unit.getReferencePeriod());
-        assertEquals("Failure - unit type not the same", UnitType.LEGAL_UNIT, unit.getType());
+    public void createUnitOfUnknownTypeFromRowKey() throws Exception {
+        StatisticalUnit statisticalUnit = RowKeyUtils.createUnitOfUnknownTypeFromRowKey(TEST_UNIT_ROWKEY);
+        assertEquals("Failure - key not the same", TEST_KEY, statisticalUnit.getKey());
+        assertEquals("Failure - reference period not the same", TEST_REFERENCE_PERIOD, statisticalUnit.getReferencePeriod());
+        assertEquals("Failure - unit type not the same", UnitType.LEGAL_UNIT, statisticalUnit.getType());
     }
 }

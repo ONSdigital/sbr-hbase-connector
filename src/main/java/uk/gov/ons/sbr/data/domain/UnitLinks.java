@@ -4,6 +4,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import org.apache.commons.lang.StringUtils;
 
 import java.time.YearMonth;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,7 +19,7 @@ public class UnitLinks extends AbstractPeriodEntity {
 
     public UnitLinks(YearMonth referencePeriod, String key) {
         super(referencePeriod, key);
-        this.parents = new HashMap<>();
+        this.parents = new EnumMap<>(UnitType.class);
         this.childJsonString = StringUtils.EMPTY;
     }
 
