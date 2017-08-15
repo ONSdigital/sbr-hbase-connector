@@ -2,6 +2,7 @@ package uk.gov.ons.sbr.data.controller;
 
 import uk.gov.ons.sbr.data.dao.AdminDataDAO;
 import uk.gov.ons.sbr.data.domain.CompanyRegistration;
+import uk.gov.ons.sbr.data.domain.PAYEReturn;
 import uk.gov.ons.sbr.data.domain.VATReturn;
 import uk.gov.ons.sbr.data.hbase.dao.HBaseAdminDataDAO;
 import uk.gov.ons.sbr.data.hbase.util.ReferencePeriodUtils;
@@ -27,6 +28,14 @@ public class AdminDataController {
 
     public Optional<CompanyRegistration> getCompanyRegistrationForReferencePeriod(YearMonth referencePeriod, String companyRegistrationNumber) throws IOException {
         return adminDataDAO.getCompanyRegistration(referencePeriod, companyRegistrationNumber);
+    }
+
+    public Optional<PAYEReturn> getPAYEReturn(String payeReferenceNumber) throws IOException {
+        return getPAYEReturnForReferencePeriod(ReferencePeriodUtils.getCurrentPeriod(), payeReferenceNumber);
+    }
+
+    public Optional<PAYEReturn> getPAYEReturnForReferencePeriod(YearMonth referencePeriod, String payeReferenceNumber) throws IOException {
+        return adminDataDAO.getPAYEReturn(referencePeriod, payeReferenceNumber);
     }
 
     public Optional<VATReturn> getVATReturn(String vatReferenceNumber) throws IOException {
