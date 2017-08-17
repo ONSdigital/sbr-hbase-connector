@@ -28,7 +28,7 @@ pipeline {
 	stage('Deploy') {
             steps {
 		bundleApp()
-		sh 'mvn package assembly:single'
+		sh 'mvn package'
 		copyToHBaseNode()
             }
         }
