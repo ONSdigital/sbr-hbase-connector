@@ -1,0 +1,80 @@
+package uk.gov.ons.sbr.data.hbase.load.links;
+
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Mapper;
+import uk.gov.ons.sbr.data.domain.UnitType;
+import uk.gov.ons.sbr.data.hbase.load.AbstractUnitDataKVMapper;
+import uk.gov.ons.sbr.data.hbase.table.ColumnFamilies;
+import uk.gov.ons.sbr.data.hbase.table.ColumnNames;
+import uk.gov.ons.sbr.data.hbase.util.RowKeyUtils;
+
+import java.io.IOException;
+
+public class UnitLinksKVMapper extends AbstractUnitDataKVMapper {
+
+    private UnitType parentUnitType;
+    private UnitType childUnitType;
+    private byte[] parentColumn;
+    private byte[] childColumnValue;
+
+    @Override
+    protected UnitType getUnitType() {
+        return UnitType.UNKNOWN;
+    }
+
+    @Override
+    protected String getHeaderString() {
+        return "entref";
+    }
+
+    @Override
+    protected int getRowKeyFieldPosition() {
+        return 0;
+    }
+
+    protected boolean useCsvHeaderAsColumnNames() {
+        return false;
+    }
+
+    public UnitLinksKVMapper(UnitType parentUnitType, UnitType childUnitType) {
+        this.parentUnitType = parentUnitType;
+        this.childUnitType = childUnitType;
+    }
+
+    @Override
+    protected byte[] getColumnFamily() {
+        return ColumnFamilies.UNIT_LINKS_DATA.getColumnFamily();
+    }
+
+    @Override
+    protected void setup(Context context) throws IOException, InterruptedException {
+        super.setup(context);
+        this.parentUnitType = UnitType.fromString(context.getConfiguration().get("parent.unit.type"));
+        this.childUnitType = UnitType.fromString(context.getConfiguration().get("child.unit.type"));
+        this.parentColumn = ("p_" + parentUnitType.toString()).getBytes();
+        this.childColumnValue = (childUnitType.toString()).getBytes();
+    }
+
+    @Override
+    protected void map(LongWritable key, Text value, Context context) throws InterruptedException, IOException {
+        // Skip header
+        if (isHeaderRow(value)) return;
+
+        String[] fields = parseLine(value, context);
+        if (fields == null) return;
+
+        writeParentChildRows(context, parentUnitType, fields[0], childUnitType, fields[1]);
+    }
+
+    private void writeParentChildRows(Context context, UnitType parentUnitType, String parentKey, UnitType childUnitType, String childKey) throws IOException, InterruptedException {
+        // Write parent row
+        String rowKeyStr = RowKeyUtils.createRowKey(getReferencePeriod(), parentKey, parentUnitType.toString());
+        writeColumnValue(context, rowKeyStr, childKey.getBytes(), childColumnValue);
+
+        // Write child row
+        rowKeyStr = RowKeyUtils.createRowKey(getReferencePeriod(), childKey, childUnitType.toString());
+        writeColumnValue(context, rowKeyStr, parentColumn, parentKey);
+    }
+
+}

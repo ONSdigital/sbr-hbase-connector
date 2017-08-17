@@ -2,6 +2,7 @@ package uk.gov.ons.sbr.data.hbase.load;
 
 import org.apache.hadoop.mapreduce.Mapper;
 import uk.gov.ons.sbr.data.domain.UnitType;
+import uk.gov.ons.sbr.data.hbase.load.links.UnitLinksKVMapper;
 
 public class KVMapperFactory {
 
@@ -18,6 +19,10 @@ public class KVMapperFactory {
             default:
                 return null;
         }
+    }
+
+    public static Class<? extends Mapper> getKVMapper(UnitType unitType, UnitType childUnit) throws ClassNotFoundException {
+        return UnitLinksKVMapper.class;
     }
 
 }

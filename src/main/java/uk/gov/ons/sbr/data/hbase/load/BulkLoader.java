@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.ons.sbr.data.domain.UnitType;
 import uk.gov.ons.sbr.data.hbase.HBaseConnector;
+import uk.gov.ons.sbr.data.hbase.load.links.UnitLinksKVMapper;
 import uk.gov.ons.sbr.data.hbase.table.TableNames;
 import uk.gov.ons.sbr.data.hbase.util.RowKeyUtils;
 
@@ -47,6 +48,7 @@ import java.util.Date;
 public class BulkLoader extends Configured implements Tool {
 
     static final String REFERENCE_PERIOD = "REFERENCE_PERIOD";
+    static final String UNIT_SEPARATOR = ":";
     private static final int SUCCESS = 0;
     private static final int ERROR = -1;
     private static final int MIN_ARGS = 3;
@@ -60,7 +62,7 @@ public class BulkLoader extends Configured implements Tool {
 
     @Override
     public int run(String[] strings) throws Exception {
-        if (strings.length < MIN_ARGS || strings.length > MAX_ARGS ) {
+        if (strings.length < MIN_ARGS || strings.length > MAX_ARGS) {
             System.out.println("INVALID ARGS, expected: load type, period, csv input file path, hfile output path (optional)");
         }
         try {
@@ -70,23 +72,31 @@ public class BulkLoader extends Configured implements Tool {
             LOG.error("Cannot parse reference period with value '{}'. Format should be '{}'", strings[ARG_REFERENCE_PERIOD], RowKeyUtils.getReferencePeriodFormat());
             System.exit(ERROR);
         }
-        UnitType unitType = UnitType.fromString(strings[ARG_LOAD_TYPE]);
+
+        // Parse unit type
+        String[] unitTypes = strings[ARG_LOAD_TYPE].split(UNIT_SEPARATOR);
+        UnitType unitType = UnitType.fromString(unitTypes[0]);
+        UnitType childUnitType = UnitType.UNKNOWN;
+        if (unitTypes.length > 1) {
+            childUnitType = UnitType.fromString(unitTypes[1]);
+        }
+
         if (unitType.equals(UnitType.UNKNOWN)) {
             LOG.error("Unknown unit type " + strings[ARG_LOAD_TYPE]);
             System.exit(ERROR);
         }
         if (strings.length == MIN_ARGS) {
-            return (load(unitType, strings[ARG_REFERENCE_PERIOD], strings[ARG_CSV_FILE]));
+            return (load(unitType, childUnitType, strings[ARG_REFERENCE_PERIOD], strings[ARG_CSV_FILE]));
         } else {
-            return load(unitType, strings[ARG_REFERENCE_PERIOD], strings[ARG_CSV_FILE], strings[ARG_HFILE_OUT_DIR]);
+            return load(unitType, childUnitType, strings[ARG_REFERENCE_PERIOD], strings[ARG_CSV_FILE], strings[ARG_HFILE_OUT_DIR]);
         }
     }
 
-    private int load(UnitType unitType, String referencePeriod, String inputFile) {
-        return load(unitType, referencePeriod, inputFile, "");
+    private int load(UnitType unitType, UnitType childUnitType, String referencePeriod, String inputFile) {
+        return load(unitType, childUnitType, referencePeriod, inputFile, "");
     }
 
-    private int load(UnitType unitType, String referencePeriod, String inputFile, String outputFilePath) {
+    private int load(UnitType unitType, UnitType childUnitType, String referencePeriod, String inputFile, String outputFilePath) {
 
         LOG.info("Starting bulk load of {} data for reference period '{}'", unitType.toString(), referencePeriod);
 
@@ -95,10 +105,17 @@ public class BulkLoader extends Configured implements Tool {
         Connection connection;
         Job job;
         try {
-            TableName tableName = TableNames.forUnitType(unitType);
-            Class<? extends Mapper> mapper = KVMapperFactory.getKVMapper(unitType);
             connection = HBaseConnector.getInstance().getConnection();
             Configuration conf = this.getConf();
+            TableName tableName = TableNames.forUnitType(unitType);
+            Class<? extends Mapper> mapper;
+            if (childUnitType.equals(UnitType.UNKNOWN)) {
+                mapper = KVMapperFactory.getKVMapper(unitType);
+            } else {
+                mapper = KVMapperFactory.getKVMapper(unitType, childUnitType);
+                conf.set("parent.unit.type", unitType.toString());
+                conf.set("child.unit.type", childUnitType.toString());
+            }
             job = Job.getInstance(conf, String.format("SBR %s Data Import", unitType.toString()));
             job.setJarByClass(mapper);
             job.setMapperClass(mapper);
