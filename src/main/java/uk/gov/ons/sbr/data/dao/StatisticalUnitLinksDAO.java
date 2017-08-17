@@ -11,9 +11,9 @@ import java.util.Optional;
 
 public interface StatisticalUnitLinksDAO {
 
-    Optional<List<StatisticalUnit>> scanUnits(YearMonth referencePeriod, String key) throws IOException;
+    Optional<List<StatisticalUnit>> scanUnits(YearMonth referencePeriod, String key) throws Exception;
 
-    Optional<UnitLinks> getUnitLinks(YearMonth referencePeriod, String key, UnitType type) throws IOException;
+    Optional<UnitLinks> getUnitLinks(YearMonth referencePeriod, String key, UnitType type) throws Exception;
 
-    void putUnitLinks(UnitLinks links, UnitType type) throws IOException;
+    void putUnitLinks(UnitLinks links, UnitType type) throws Exception;
 }

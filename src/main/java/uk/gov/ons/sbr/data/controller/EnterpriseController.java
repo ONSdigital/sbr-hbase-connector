@@ -27,11 +27,11 @@ public class EnterpriseController {
         this.unitLinksDAO = new HBaseStatisticalUnitLinksDAO();
     }
 
-    public Optional<Enterprise> getEnterprise(String enterpriseReferenceNumber) throws IOException {
+    public Optional<Enterprise> getEnterprise(String enterpriseReferenceNumber) throws Exception {
         return getEnterpriseForReferencePeriod(ReferencePeriodUtils.getCurrentPeriod(), enterpriseReferenceNumber);
     }
 
-    public Optional<Enterprise> getEnterpriseForReferencePeriod(YearMonth referencePeriod, String enterpriseReferenceNumber) throws IOException {
+    public Optional<Enterprise> getEnterpriseForReferencePeriod(YearMonth referencePeriod, String enterpriseReferenceNumber) throws Exception {
         Optional<Enterprise> enterprise = enterpriseDAO.getEnterprise(referencePeriod, enterpriseReferenceNumber);
         if (enterprise.isPresent()) {
             Optional<UnitLinks> links = unitLinksDAO.getUnitLinks(referencePeriod, enterpriseReferenceNumber, UnitType.ENTERPRISE);
@@ -42,13 +42,13 @@ public class EnterpriseController {
         return enterprise;
     }
 
-    public void updateEnterpriseVariableValue(YearMonth referencePeriod, String enterpriseReferenceNumber, String variableName, String newValue) throws IOException {
+    public void updateEnterpriseVariableValue(YearMonth referencePeriod, String enterpriseReferenceNumber, String variableName, String newValue) throws Exception {
         Enterprise updatedEnterprise = new Enterprise(referencePeriod, enterpriseReferenceNumber);
         updatedEnterprise.putVariable(variableName, newValue);
         enterpriseDAO.putEnterprise(updatedEnterprise);
     }
 
-    public void updateEnterpriseVariableValues(YearMonth referencePeriod, String enterpriseReferenceNumber, Map<String, String> newVariableValues) throws IOException {
+    public void updateEnterpriseVariableValues(YearMonth referencePeriod, String enterpriseReferenceNumber, Map<String, String> newVariableValues) throws Exception {
         Enterprise updatedEnterprise = new Enterprise(referencePeriod, enterpriseReferenceNumber);
         updatedEnterprise.putVariables(newVariableValues);
         enterpriseDAO.putEnterprise(updatedEnterprise);

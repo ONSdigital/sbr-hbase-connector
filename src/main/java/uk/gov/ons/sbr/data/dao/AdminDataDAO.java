@@ -13,10 +13,10 @@ import java.util.Optional;
  */
 public interface AdminDataDAO {
 
-    Optional<CompanyRegistration> getCompanyRegistration(YearMonth referencePeriod, String key) throws IOException;
+    Optional<CompanyRegistration> getCompanyRegistration(YearMonth referencePeriod, String key) throws Exception;
 
-    Optional<VATReturn> getVATReturn(YearMonth referencePeriod, String key) throws IOException;
+    Optional<VATReturn> getVATReturn(YearMonth referencePeriod, String key) throws Exception;
 
-    Optional<PAYEReturn> getPAYEReturn(YearMonth referencePeriod, String key) throws IOException;
+    Optional<PAYEReturn> getPAYEReturn(YearMonth referencePeriod, String key) throws Exception;
 
 }

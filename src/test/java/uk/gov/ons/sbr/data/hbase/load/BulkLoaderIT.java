@@ -9,6 +9,7 @@ import uk.gov.ons.sbr.data.domain.UnitType;
 import uk.gov.ons.sbr.data.domain.VATReturn;
 import uk.gov.ons.sbr.data.hbase.AbstractHBaseIT;
 import uk.gov.ons.sbr.data.hbase.HBaseConnector;
+import uk.gov.ons.sbr.data.hbase.InMemoryHBase;
 import uk.gov.ons.sbr.data.hbase.util.RowKeyUtils;
 
 import java.io.File;
@@ -36,7 +37,7 @@ public class BulkLoaderIT extends AbstractHBaseIT {
         File file = new File(TEST_CH_CSV);
         assertTrue("Test file not found", file.exists());
 
-        int result = ToolRunner.run(HBaseConnector.getInstance().getConfiguration(), bulkLoader, new String[]{UnitType.COMPANY_REGISTRATION.toString(), TEST_PERIOD_STR, TEST_CH_CSV});
+        int result = loadData(new String[]{UnitType.COMPANY_REGISTRATION.toString(), TEST_PERIOD_STR, TEST_CH_CSV});
         assertEquals("Bulk load failed", 0, result);
 
         Optional<CompanyRegistration> company = adminDataController.getCompanyRegistrationForReferencePeriod(TEST_PERIOD, "04375380");
@@ -50,7 +51,7 @@ public class BulkLoaderIT extends AbstractHBaseIT {
         File file = new File(TEST_PAYE_CSV);
         assertTrue("Test file not found", file.exists());
 
-        int result = ToolRunner.run(HBaseConnector.getInstance().getConfiguration(), bulkLoader, new String[]{UnitType.PAYE.toString(), TEST_PERIOD_STR, TEST_PAYE_CSV});
+        int result = loadData(new String[]{UnitType.PAYE.toString(), TEST_PERIOD_STR, TEST_PAYE_CSV});
         assertEquals("Bulk load failed", 0, result);
 
         Optional<PAYEReturn> payeReturn = adminDataController.getPAYEReturnForReferencePeriod(TEST_PERIOD, "8878574");
@@ -64,13 +65,17 @@ public class BulkLoaderIT extends AbstractHBaseIT {
         File file = new File(TEST_VAT_CSV);
         assertTrue("Test file not found", file.exists());
 
-        int result = ToolRunner.run(HBaseConnector.getInstance().getConfiguration(), bulkLoader, new String[]{UnitType.VAT.toString(), TEST_PERIOD_STR, TEST_VAT_CSV});
+        int result = loadData(new String[]{UnitType.VAT.toString(), TEST_PERIOD_STR, TEST_VAT_CSV});
         assertEquals("Bulk load failed", 0, result);
 
         Optional<VATReturn> vatReturn = adminDataController.getVATReturnForReferencePeriod(TEST_PERIOD, "808281648666");
         assertTrue("No VAT record found", vatReturn.isPresent());
 
         assertEquals("No VAT record found", "808281648666", vatReturn.get().getKey());
+    }
+
+    public int loadData (String[] args) throws Exception {
+        return ToolRunner.run(HBaseConnector.getInstance().getConfiguration(), bulkLoader, args);
     }
 
 }

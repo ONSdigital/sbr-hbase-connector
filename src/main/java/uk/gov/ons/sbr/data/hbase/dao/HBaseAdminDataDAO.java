@@ -25,17 +25,17 @@ import java.util.Optional;
 public class HBaseAdminDataDAO extends HBaseStatisticalUnitDAO implements AdminDataDAO {
 
     @Override
-    public Optional<CompanyRegistration> getCompanyRegistration(YearMonth referencePeriod, String key) throws IOException {
+    public Optional<CompanyRegistration> getCompanyRegistration(YearMonth referencePeriod, String key) throws Exception {
         return getUnit(UnitType.COMPANY_REGISTRATION, referencePeriod, key);
     }
 
     @Override
-    public Optional<VATReturn> getVATReturn(YearMonth referencePeriod, String key) throws IOException {
+    public Optional<VATReturn> getVATReturn(YearMonth referencePeriod, String key) throws Exception {
         return getUnit(UnitType.VAT, referencePeriod, key);
     }
 
     @Override
-    public Optional<PAYEReturn> getPAYEReturn(YearMonth referencePeriod, String key) throws IOException {
+    public Optional<PAYEReturn> getPAYEReturn(YearMonth referencePeriod, String key) throws Exception {
         return getUnit(UnitType.PAYE, referencePeriod, key);
     }
 

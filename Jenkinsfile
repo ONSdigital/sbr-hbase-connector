@@ -28,7 +28,7 @@ pipeline {
 	stage('Deploy') {
             steps {
 		bundleApp()
-		sh 'mvn package assembly:single'
+		sh 'mvn package'
 		copyToHBaseNode()
             }
         }
@@ -52,7 +52,7 @@ def copyToHBaseNode() {
         withCredentials([string(credentialsId: "sbr-hbase-node", variable: 'HBASE_NODE')]) {
             sh '''
                     ssh sbr-$ENV-ci@$HBASE_NODE mkdir -p $HBASE_CONNECTOR_DIR/lib
-                    scp ${WORKSPACE}/target/*-distribution.jar sbr-$ENV-ci@$HBASE_NODE:$HBASE_CONNECTOR_DIR/lib
+                    scp ${WORKSPACE}/target/*-jar-with-dependencies.jar sbr-$ENV-ci@$HBASE_NODE:$HBASE_CONNECTOR_DIR/lib
 					echo "Successfully copied jar file to $HBASE_CONNECTOR_DIR/lib directory on $HBASE_NODE"
 					ssh sbr-$ENV-ci@$HBASE_NODE mkdir -p $HBASE_CONNECTOR_DIR/conf
 					scp ${WORKSPACE}/conf/$ENV/* sbr-$ENV-ci@$HBASE_NODE:$HBASE_CONNECTOR_DIR/conf

@@ -13,7 +13,7 @@ class AbstractHBaseDAO {
 
     private Connection connection;
 
-    Connection getConnection() throws IOException {
+    Connection getConnection() throws Exception {
         if (connection != null) return connection;
         connection = this.connection = HBaseConnector.getInstance().getConnection();
         return connection;

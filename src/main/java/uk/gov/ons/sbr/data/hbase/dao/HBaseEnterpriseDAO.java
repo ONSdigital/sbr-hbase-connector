@@ -28,12 +28,12 @@ public class HBaseEnterpriseDAO extends HBaseStatisticalUnitDAO implements Enter
     private static final Logger LOG = LoggerFactory.getLogger(HBaseEnterpriseDAO.class.getName());
 
     @Override
-    public Optional<Enterprise> getEnterprise(YearMonth referencePeriod, String key) throws IOException {
+    public Optional<Enterprise> getEnterprise(YearMonth referencePeriod, String key) throws Exception {
         return getUnit(UnitType.ENTERPRISE, referencePeriod, key);
     }
 
     @Override
-    public void putEnterprise(Enterprise enterprise) throws IOException {
+    public void putEnterprise(Enterprise enterprise) throws Exception {
         putUnit(enterprise);
     }
 }
