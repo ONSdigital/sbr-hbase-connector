@@ -38,7 +38,7 @@ public class HBaseConnector {
         instance = new HBaseConnector();
         // If system property set run against in memory test HBase instance
         if (Boolean.valueOf(System.getProperty(IN_MEMORY_HBASE))) {
-            LOG.info("'{}' is set to true so using in memory HBase database");
+            LOG.info("'{}' is set to true so using in memory HBase database", IN_MEMORY_HBASE);
             instance.isInMemoryHBase = true;
             // In memory database does not support namespaces so set to empty string
             System.setProperty("sbr.hbase.namespace", "");
