@@ -18,7 +18,7 @@ public class InMemoryHBase {
 
     public static Configuration init() throws Exception {
         if (hBaseTestingUtility == null) {
-            LOG.info("Starting in memory Hbase instance...");
+            LOG.info("Starting in memory HBase instance...");
             hBaseTestingUtility = new HBaseTestingUtility();
             hBaseTestingUtility.setJobWithoutMRCluster();
             hBaseTestingUtility.startMiniCluster();
@@ -27,7 +27,7 @@ public class InMemoryHBase {
             hBaseTestingUtility.createTable(TableNames.COMPANIES_HOUSE_DATA.getTableName(), ColumnFamilies.COMPANY_DATA.getColumnFamily());
             hBaseTestingUtility.createTable(TableNames.VAT.getTableName(), ColumnFamilies.VAT_DATA.getColumnFamily());
             hBaseTestingUtility.createTable(TableNames.PAYE.getTableName(), ColumnFamilies.PAYE_DATA.getColumnFamily());
-            LOG.info("In memory Hbase instance started");
+            LOG.info("In memory HBase instance started");
         }
         return hBaseTestingUtility.getConfiguration();
     }

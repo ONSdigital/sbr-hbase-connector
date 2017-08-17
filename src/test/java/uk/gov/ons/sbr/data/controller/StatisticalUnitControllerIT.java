@@ -1,5 +1,6 @@
 package uk.gov.ons.sbr.data.controller;
 
+import org.junit.Before;
 import org.junit.Test;
 import uk.gov.ons.sbr.data.domain.StatisticalUnit;
 import uk.gov.ons.sbr.data.domain.UnitType;
@@ -13,6 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class StatisticalUnitControllerIT extends AbstractHBaseIT {
@@ -22,20 +24,24 @@ public class StatisticalUnitControllerIT extends AbstractHBaseIT {
     private static final String TEST_KEY = "635663737";
     private UnitController controller;
 
+    @Before
+    public void setup() throws Exception {
+        controller = new UnitController();
+    }
+
     @Test
     public void findUnits() throws Exception {
         // Put test unit
         Map<UnitType, String> parents = new HashMap<>();
         parents.put(UnitType.ENTERPRISE, TEST_ENTERPRISE_REFERENCE_NUMBER);
-        String children =  "{ch: '43546583', vat: [658873556378], paye: [567P784]}";
-        controller = new UnitController();
+        String children = "{ch: '43546583', vat: [658873556378], paye: [567P784]}";
         controller.updateUnitLinks(TEST_REFERENCE_PERIOD, TEST_KEY, UnitType.LEGAL_UNIT, parents, children);
 
         // Put 2nd test unit with enterprise key +1
         parents = new HashMap<>();
         parents.put(UnitType.ENTERPRISE, TEST_ENTERPRISE_REFERENCE_NUMBER);
         controller = new UnitController();
-        controller.updateUnitLinks(TEST_REFERENCE_PERIOD, String.valueOf(Integer.valueOf(TEST_KEY)+1), UnitType.LEGAL_UNIT, parents, children);
+        controller.updateUnitLinks(TEST_REFERENCE_PERIOD, String.valueOf(Integer.valueOf(TEST_KEY) + 1), UnitType.LEGAL_UNIT, parents, children);
 
         // Find Unit
         Optional<List<StatisticalUnit>> matchingUnits = controller.findUnits(TEST_REFERENCE_PERIOD, TEST_KEY);
@@ -60,7 +66,13 @@ public class StatisticalUnitControllerIT extends AbstractHBaseIT {
         matchingUnits = controller.findUnits(TEST_REFERENCE_PERIOD, TEST_KEY);
         assertTrue("Failure - units should be found", matchingUnits.isPresent());
         assertEquals("Failure - 2 matching unit should be found", 2, matchingUnits.get().size());
+    }
 
+    @Test
+    public void findUnitsNoMatch() throws Exception {
+        // Find Units (no match)
+        Optional<List<StatisticalUnit>> matchingUnits = controller.findUnits(TEST_REFERENCE_PERIOD, "xxx");
+        assertFalse("Failure - no units should be found", matchingUnits.isPresent());
     }
 
 }

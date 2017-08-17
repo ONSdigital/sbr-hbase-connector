@@ -48,8 +48,13 @@ public class HBaseStatisticalUnitLinksDAO extends AbstractHBaseDAO implements St
                     statisticalUnit.setLinks(convertToUnitLinks(referencePeriod, key, result));
                     statisticalUnits.add(statisticalUnit);
                 });
-                LOG.debug("Total units found matching partial row key '{}' is {}", partialRowKey, statisticalUnits.size());
-                matchingUnits = Optional.of(statisticalUnits);
+                if (statisticalUnits.isEmpty()) {
+                    LOG.debug("No units matching partial row key '{}'", partialRowKey);
+                    matchingUnits = Optional.empty();
+                } else {
+                    LOG.debug("Total units found matching partial row key '{}' is {}", partialRowKey, statisticalUnits.size());
+                    matchingUnits = Optional.of(statisticalUnits);
+                }
             }
         } catch (Exception e) {
             LOG.error("Error getting enterprise data for partial row key '{}'", partialRowKey, e);
