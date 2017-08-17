@@ -24,15 +24,15 @@ public class UnitController {
         this.unitLinksDAO = new HBaseStatisticalUnitLinksDAO();
     }
 
-    public Optional<List<StatisticalUnit>> findUnits(String unitReferenceNumber) throws IOException {
+    public Optional<List<StatisticalUnit>> findUnits(String unitReferenceNumber) throws Exception {
         return findUnits(ReferencePeriodUtils.getCurrentPeriod(), unitReferenceNumber);
     }
 
-    public Optional<List<StatisticalUnit>> findUnits(YearMonth referencePeriod, String unitReferenceNumber) throws IOException {
+    public Optional<List<StatisticalUnit>> findUnits(YearMonth referencePeriod, String unitReferenceNumber) throws Exception {
         return unitLinksDAO.scanUnits(referencePeriod, unitReferenceNumber);
     }
 
-    public void updateUnitLinks(YearMonth referencePeriod, String unitKey, UnitType type, Map<UnitType, String> parents, String childrenJsonAsString) throws IOException {
+    public void updateUnitLinks(YearMonth referencePeriod, String unitKey, UnitType type, Map<UnitType, String> parents, String childrenJsonAsString) throws Exception {
         UnitLinks updatedLinks = new UnitLinks(referencePeriod, unitKey);
         if (parents != null) {
             updatedLinks.setParents(parents);

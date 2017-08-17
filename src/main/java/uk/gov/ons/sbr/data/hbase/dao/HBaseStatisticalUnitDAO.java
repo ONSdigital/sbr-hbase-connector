@@ -27,11 +27,11 @@ public class HBaseStatisticalUnitDAO extends AbstractHBaseDAO {
 
     private static final Logger LOG = LoggerFactory.getLogger(HBaseStatisticalUnitDAO.class.getName());
 
-    <T extends StatisticalUnit> Optional<T> getUnit(UnitType unitType, YearMonth referencePeriod, String key) throws IOException {
+    <T extends StatisticalUnit> Optional<T> getUnit(UnitType unitType, YearMonth referencePeriod, String key) throws Exception {
         return this.getUnit(unitType, RowKeyUtils.createRowKey(referencePeriod, key));
     }
 
-    private <T extends StatisticalUnit> Optional<T> getUnit(UnitType unitType, String rowKey) throws IOException {
+    private <T extends StatisticalUnit> Optional<T> getUnit(UnitType unitType, String rowKey) throws Exception {
         Optional<T> unit;
         try (Table table = getConnection().getTable(TableNames.forUnitType(unitType))) {
             Get get = new Get(Bytes.toBytes(rowKey));
@@ -43,7 +43,7 @@ public class HBaseStatisticalUnitDAO extends AbstractHBaseDAO {
                 LOG.debug("Found {} data for row key '{}'", unitType, rowKey);
                 unit = Optional.of(convertToStatisticalUnit(unitType, result));
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOG.error("Error getting {} data for row key '{}'", unitType, rowKey, e);
             throw e;
         }
@@ -62,7 +62,7 @@ public class HBaseStatisticalUnitDAO extends AbstractHBaseDAO {
         return (T)unit;
     }
 
-    void putUnit(StatisticalUnit unit) throws IOException {
+    void putUnit(StatisticalUnit unit) throws Exception {
         Put unitRow;
         String rowKey = RowKeyUtils.createRowKey(unit.getReferencePeriod(), unit.getKey());
         try (Table table = getConnection().getTable(TableNames.forUnitType(unit.getType()))) {
@@ -70,7 +70,7 @@ public class HBaseStatisticalUnitDAO extends AbstractHBaseDAO {
             unit.getVariables().forEach((variable, value) -> unitRow.addColumn(ColumnFamilies.forUnitType(unit.getType()), Bytes.toBytes(variable), Bytes.toBytes(value)));
             table.put(unitRow);
             LOG.debug("Inserted {} data for row key '{}'", unit.getType(), rowKey);
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOG.error("Error inserting {} data for row key '{}'", unit.getType(), rowKey, e);
             throw e;
         }

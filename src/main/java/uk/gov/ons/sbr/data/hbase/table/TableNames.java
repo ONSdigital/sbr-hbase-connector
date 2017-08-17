@@ -18,7 +18,7 @@ public enum TableNames {
     private TableName tableName;
 
     TableNames(String tableName) {
-        this.tableName = TableName.valueOf(System.getProperty("SBR_NAMESPACE", "sbr_local_db"), tableName);
+        this.tableName = TableName.valueOf(System.getProperty("sbr.hbase.namespace", "sbr_local_db"), tableName);
     }
 
     public TableName getTableName() {

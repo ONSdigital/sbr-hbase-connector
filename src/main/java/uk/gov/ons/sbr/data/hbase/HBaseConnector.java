@@ -5,7 +5,6 @@ import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.Admin;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
-import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +16,7 @@ import java.util.Arrays;
 
 public class HBaseConnector {
 
+    public static final String IN_MEMORY_HBASE = "sbr.hbase.inmemory";
     private static final String ZOOKEEPER_QUORUM = "ZOOKEEPER_QUORUM";
     private static final String ZOOKEEPER_PORT = "ZOOKEEPER_PORT";
     private static final String KERBEROS_PRINCIPAL = "KERBEROS_PRINCIPAL";
@@ -30,11 +30,20 @@ public class HBaseConnector {
     private static final Logger LOG = LoggerFactory.getLogger(HBaseConnector.class.getName());
     private Configuration configuration;
     private Connection connection;
+    private boolean isInMemoryHBase = false;
     private static HBaseConnector instance;
 
-    public static synchronized HBaseConnector getInstance() {
+    public static synchronized HBaseConnector getInstance() throws Exception {
         if (instance != null) return instance;
         instance = new HBaseConnector();
+        // If system property set run against in memory test HBase instance
+        if (Boolean.valueOf(System.getProperty(IN_MEMORY_HBASE))) {
+            LOG.info("'{}' is set to true so using in memory HBase database");
+            instance.isInMemoryHBase = true;
+            // In memory database does not support namespaces so set to empty string
+            System.setProperty("sbr.hbase.namespace", "");
+            instance.setConfiguration(InMemoryHBase.init());
+        }
         return instance;
     }
 
@@ -47,6 +56,9 @@ public class HBaseConnector {
     }
 
     public void connect() throws IOException {
+        // If in memory HBase no need to connect
+        if (isInMemoryHBase) return;
+
         // Configure HBase
         String hbaseSite = System.getProperty(HBASE_SITE_XML);
         if (hbaseSite == null) {
@@ -158,7 +170,7 @@ public class HBaseConnector {
         if (connection != null) connection.close();
     }
 
-    private void validateSchema() throws IOException {
+    private void validateSchema() throws Exception {
         LOG.info("Validating schema...");
         boolean isValid = true;
         try (Admin hbaseAdmin = HBaseConnector.getInstance().getConnection().getAdmin()) {
@@ -178,7 +190,7 @@ public class HBaseConnector {
         }
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         HBaseConnector.getInstance().connect();
         HBaseConnector.getInstance().validateSchema();
     }

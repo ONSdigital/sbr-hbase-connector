@@ -30,7 +30,7 @@ public class HBaseStatisticalUnitLinksDAO extends AbstractHBaseDAO implements St
     private static final Logger LOG = LoggerFactory.getLogger(HBaseStatisticalUnitLinksDAO.class.getName());
 
     @Override
-    public Optional<List<StatisticalUnit>> scanUnits(YearMonth referencePeriod, String key) throws IOException {
+    public Optional<List<StatisticalUnit>> scanUnits(YearMonth referencePeriod, String key) throws Exception {
         LOG.debug("Searching for units for reference period '{}' and key '{}'", referencePeriod, key);
         String partialRowKey = RowKeyUtils.createRowKey(referencePeriod, key);
         Optional<List<StatisticalUnit>> matchingUnits;
@@ -51,7 +51,7 @@ public class HBaseStatisticalUnitLinksDAO extends AbstractHBaseDAO implements St
                 LOG.debug("Total units found matching partial row key '{}' is {}", partialRowKey, statisticalUnits.size());
                 matchingUnits = Optional.of(statisticalUnits);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOG.error("Error getting enterprise data for partial row key '{}'", partialRowKey, e);
             throw e;
         }
@@ -59,7 +59,7 @@ public class HBaseStatisticalUnitLinksDAO extends AbstractHBaseDAO implements St
     }
 
     @Override
-    public Optional<UnitLinks> getUnitLinks(YearMonth referencePeriod, String key, UnitType type) throws IOException {
+    public Optional<UnitLinks> getUnitLinks(YearMonth referencePeriod, String key, UnitType type) throws Exception {
         String rowKey = RowKeyUtils.createRowKey(referencePeriod, key, type.toString());
         Optional<UnitLinks> links;
         try (Table table = getConnection().getTable(UNIT_LINKS_TABLE)) {
@@ -72,7 +72,7 @@ public class HBaseStatisticalUnitLinksDAO extends AbstractHBaseDAO implements St
                 LOG.debug("Found unit links data for row key '{}'", rowKey);
                 links = Optional.of(convertToUnitLinks(referencePeriod, key, result));
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOG.error("Error getting enterprise data for row key '{}'", rowKey, e);
             throw e;
         }
@@ -99,7 +99,7 @@ public class HBaseStatisticalUnitLinksDAO extends AbstractHBaseDAO implements St
     }
 
     @Override
-    public void putUnitLinks(UnitLinks links, UnitType type) throws IOException {
+    public void putUnitLinks(UnitLinks links, UnitType type) throws Exception {
         Put linksRow;
         String rowKey = RowKeyUtils.createRowKey(links.getReferencePeriod(), links.getKey(), type.toString());
 
@@ -115,7 +115,7 @@ public class HBaseStatisticalUnitLinksDAO extends AbstractHBaseDAO implements St
 
             table.put(linksRow);
             LOG.debug("Inserted unit links data for row key '{}'", rowKey);
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOG.error("Error inserting unit links data for row key '{}'", rowKey, e);
             throw e;
         }
