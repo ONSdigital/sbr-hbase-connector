@@ -3,6 +3,8 @@ package uk.gov.ons.sbr.data.hbase.load.links;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.ons.sbr.data.domain.UnitType;
 import uk.gov.ons.sbr.data.hbase.load.AbstractUnitDataKVMapper;
 import uk.gov.ons.sbr.data.hbase.table.ColumnFamilies;
@@ -13,6 +15,7 @@ import java.io.IOException;
 
 public class UnitLinksKVMapper extends AbstractUnitDataKVMapper {
 
+    private static final Logger LOG = LoggerFactory.getLogger(UnitLinksKVMapper.class.getName());
     private UnitType parentUnitType;
     private UnitType childUnitType;
     private byte[] parentColumn;
@@ -37,11 +40,6 @@ public class UnitLinksKVMapper extends AbstractUnitDataKVMapper {
         return false;
     }
 
-    public UnitLinksKVMapper(UnitType parentUnitType, UnitType childUnitType) {
-        this.parentUnitType = parentUnitType;
-        this.childUnitType = childUnitType;
-    }
-
     @Override
     protected byte[] getColumnFamily() {
         return ColumnFamilies.UNIT_LINKS_DATA.getColumnFamily();
@@ -52,6 +50,7 @@ public class UnitLinksKVMapper extends AbstractUnitDataKVMapper {
         super.setup(context);
         this.parentUnitType = UnitType.fromString(context.getConfiguration().get("parent.unit.type"));
         this.childUnitType = UnitType.fromString(context.getConfiguration().get("child.unit.type"));
+        LOG.info("Parsing linked data with parent unit type '{} and child unit type '{}'", parentUnitType.toString(), childUnitType.toString());
         this.parentColumn = ("p_" + parentUnitType.toString()).getBytes();
         this.childColumnValue = (childUnitType.toString()).getBytes();
     }

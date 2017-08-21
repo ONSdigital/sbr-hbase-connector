@@ -48,7 +48,7 @@ import java.util.Date;
 public class BulkLoader extends Configured implements Tool {
 
     static final String REFERENCE_PERIOD = "REFERENCE_PERIOD";
-    static final String UNIT_SEPARATOR = ":";
+    static final String UNIT_SEPARATOR = "~";
     private static final int SUCCESS = 0;
     private static final int ERROR = -1;
     private static final int MIN_ARGS = 3;
@@ -57,7 +57,7 @@ public class BulkLoader extends Configured implements Tool {
     private static final int ARG_REFERENCE_PERIOD = 1;
     private static final int ARG_CSV_FILE = 2;
     private static final int ARG_HFILE_OUT_DIR = 3;
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractUnitDataKVMapper.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(BulkLoader.class.getName());
 
 
     @Override
@@ -79,6 +79,7 @@ public class BulkLoader extends Configured implements Tool {
         UnitType childUnitType = UnitType.UNKNOWN;
         if (unitTypes.length > 1) {
             childUnitType = UnitType.fromString(unitTypes[1]);
+            LOG.info("Loading linked data with parent unit type '{} and child unit type '{}'", unitType.toString(), childUnitType.toString());
         }
 
         if (unitType.equals(UnitType.UNKNOWN)) {
@@ -107,11 +108,13 @@ public class BulkLoader extends Configured implements Tool {
         try {
             connection = HBaseConnector.getInstance().getConnection();
             Configuration conf = this.getConf();
-            TableName tableName = TableNames.forUnitType(unitType);
+            TableName tableName;
             Class<? extends Mapper> mapper;
             if (childUnitType.equals(UnitType.UNKNOWN)) {
+                tableName = TableNames.forUnitType(unitType);
                 mapper = KVMapperFactory.getKVMapper(unitType);
             } else {
+                tableName = TableNames.UNIT_LINKS.getTableName();
                 mapper = KVMapperFactory.getKVMapper(unitType, childUnitType);
                 conf.set("parent.unit.type", unitType.toString());
                 conf.set("child.unit.type", childUnitType.toString());

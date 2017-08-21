@@ -3,10 +3,8 @@ package uk.gov.ons.sbr.data.hbase.load;
 import org.apache.hadoop.util.ToolRunner;
 import org.junit.Test;
 import uk.gov.ons.sbr.data.controller.AdminDataController;
-import uk.gov.ons.sbr.data.domain.CompanyRegistration;
-import uk.gov.ons.sbr.data.domain.PAYEReturn;
-import uk.gov.ons.sbr.data.domain.UnitType;
-import uk.gov.ons.sbr.data.domain.VATReturn;
+import uk.gov.ons.sbr.data.controller.UnitController;
+import uk.gov.ons.sbr.data.domain.*;
 import uk.gov.ons.sbr.data.hbase.AbstractHBaseIT;
 import uk.gov.ons.sbr.data.hbase.HBaseConnector;
 import uk.gov.ons.sbr.data.hbase.InMemoryHBase;
@@ -16,10 +14,12 @@ import java.io.File;
 import java.time.Month;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static uk.gov.ons.sbr.data.hbase.load.BulkLoader.UNIT_SEPARATOR;
 
 public class BulkLoaderIT extends AbstractHBaseIT {
 
@@ -28,8 +28,10 @@ public class BulkLoaderIT extends AbstractHBaseIT {
     private static final String TEST_CH_CSV = "src/test/resources/input/sbr-2500-ent-ch-data.csv";
     private static final String TEST_PAYE_CSV = "src/test/resources/input/paye-data.csv";
     private static final String TEST_VAT_CSV = "src/test/resources/input/vat-data.csv";
+    private static final String TEST_ENT_LEU_LINKS_CSV = "src/test/resources/input/ent-leu-links.csv";
     private BulkLoader bulkLoader = new BulkLoader();
     private AdminDataController adminDataController = new AdminDataController();
+    private UnitController unitController = new UnitController();
 
 
     @Test
@@ -72,6 +74,20 @@ public class BulkLoaderIT extends AbstractHBaseIT {
         assertTrue("No VAT record found", vatReturn.isPresent());
 
         assertEquals("No VAT record found", "808281648666", vatReturn.get().getKey());
+    }
+
+    @Test
+    public void loadEntLeuLinksData() throws Exception {
+        File file = new File(TEST_ENT_LEU_LINKS_CSV);
+        assertTrue("Test file not found", file.exists());
+
+        int result = loadData(new String[]{UnitType.ENTERPRISE.toString()+UNIT_SEPARATOR+UnitType.LEGAL_UNIT.toString(), TEST_PERIOD_STR, TEST_ENT_LEU_LINKS_CSV});
+        assertEquals("Bulk load failed", 0, result);
+
+        Optional<List<StatisticalUnit>> unit = unitController.findUnits("9900000005");
+        assertTrue("No unit record found", unit.isPresent());
+
+        assertEquals("No record found", "9900000005", unit.get().get(0).getKey());
     }
 
     public int loadData (String[] args) throws Exception {

@@ -15,6 +15,7 @@ import java.util.Map;
 public class UnitLinks extends AbstractPeriodEntity {
 
     private Map<UnitType, String> parents;
+    private Map<String, UnitType> children;
     private String childJsonString;
 
     public UnitLinks(YearMonth referencePeriod, String key) {
@@ -34,8 +35,21 @@ public class UnitLinks extends AbstractPeriodEntity {
     public void setParents(Map<UnitType, String> parents) {
         this.parents = parents;
     }
-    public void putParent(UnitType type, String key){
+
+    public void putParent(UnitType type, String key) {
         this.parents.put(type, key);
+    }
+
+    public Map<String, UnitType> getChildren() {
+        return children;
+    }
+
+    public void setChildren(Map<String, UnitType> children) {
+        this.children = children;
+    }
+
+    public void putChild(UnitType type, String key) {
+        this.children.put(key, type);
     }
 
     public void setChildJsonString(String childJsonAsString) {
