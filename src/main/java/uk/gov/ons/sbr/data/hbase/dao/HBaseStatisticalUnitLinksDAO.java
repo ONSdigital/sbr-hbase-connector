@@ -26,7 +26,8 @@ public class HBaseStatisticalUnitLinksDAO extends AbstractHBaseDAO implements St
     private static final TableName UNIT_LINKS_TABLE = TableNames.UNIT_LINKS.getTableName();
     private static final byte[] UNIT_LINKS_CF = ColumnFamilies.UNIT_LINKS_DATA.getColumnFamily();
     private static final String CHILDREN_COLUMN = "children";
-    private static final String PARENT_COLUMN_PREFIX = "p_";
+    public static final String PARENT_COLUMN_PREFIX = "p_";
+    public static final String CHILD_COLUMN_PREFIX = "c_";
     private static final Logger LOG = LoggerFactory.getLogger(HBaseStatisticalUnitLinksDAO.class.getName());
 
     @Override
@@ -91,13 +92,16 @@ public class HBaseStatisticalUnitLinksDAO extends AbstractHBaseDAO implements St
             String value = new String(CellUtil.cloneValue(cell));
             // Columns starting with 'p_' denote a parent
             if (column.startsWith(PARENT_COLUMN_PREFIX)) {
-                LOG.debug("Found unit link parent {} with value '{}'", column, value);
+                LOG.debug("Found unit link parent '{}' with value '{}'", column, value);
                 links.putParent(UnitType.fromString(column.substring(PARENT_COLUMN_PREFIX.length())), value);
             } else if (column.equals(CHILDREN_COLUMN)) {
-                LOG.debug("Found unit link children {} with value '{}'", column, value);
+                LOG.debug("Found unit link children '{}' with value '{}'", column, value);
                 links.setChildJsonString(value);
+            } else if (column.startsWith(CHILD_COLUMN_PREFIX)) {
+                LOG.debug("Found unit link child '{}' of type '{}'", column, value);
+                links.putChild(UnitType.fromString(column.substring(CHILD_COLUMN_PREFIX.length())), value);
             } else {
-                LOG.debug("Found unit link column {} with value '{}' - IGNORING", column, value);
+                LOG.debug("Found unit link column '{}' with value '{}' - IGNORING", column, value);
             }
         }
         return links;
@@ -114,6 +118,8 @@ public class HBaseStatisticalUnitLinksDAO extends AbstractHBaseDAO implements St
             // Add parents
             links.getParents().forEach((parentType, value) -> linksRow.addColumn(UNIT_LINKS_CF, Bytes.toBytes(PARENT_COLUMN_PREFIX + parentType.toString()), Bytes.toBytes(value)));
             // Add children
+            links.getChildren().forEach((value, childType) -> linksRow.addColumn(UNIT_LINKS_CF, Bytes.toBytes(CHILD_COLUMN_PREFIX + value), Bytes.toBytes(childType.toString())));
+            // Add children json string
             if (!links.getChildJsonString().isEmpty()) {
                 linksRow.addColumn(UNIT_LINKS_CF, Bytes.toBytes(CHILDREN_COLUMN), Bytes.toBytes(links.getChildJsonString()));
             }

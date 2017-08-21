@@ -2,20 +2,18 @@ package uk.gov.ons.sbr.data.hbase.load.links;
 
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.Mapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.gov.ons.sbr.data.domain.UnitType;
 import uk.gov.ons.sbr.data.hbase.load.AbstractUnitDataKVMapper;
 import uk.gov.ons.sbr.data.hbase.table.ColumnFamilies;
-import uk.gov.ons.sbr.data.hbase.table.ColumnNames;
 import uk.gov.ons.sbr.data.hbase.util.RowKeyUtils;
 
 import java.io.IOException;
 
+import static uk.gov.ons.sbr.data.hbase.dao.HBaseStatisticalUnitLinksDAO.CHILD_COLUMN_PREFIX;
+import static uk.gov.ons.sbr.data.hbase.dao.HBaseStatisticalUnitLinksDAO.PARENT_COLUMN_PREFIX;
+
 public class UnitLinksKVMapper extends AbstractUnitDataKVMapper {
 
-    private static final Logger LOG = LoggerFactory.getLogger(UnitLinksKVMapper.class.getName());
     private UnitType parentUnitType;
     private UnitType childUnitType;
     private byte[] parentColumn;
@@ -50,8 +48,7 @@ public class UnitLinksKVMapper extends AbstractUnitDataKVMapper {
         super.setup(context);
         this.parentUnitType = UnitType.fromString(context.getConfiguration().get("parent.unit.type"));
         this.childUnitType = UnitType.fromString(context.getConfiguration().get("child.unit.type"));
-        LOG.info("Parsing linked data with parent unit type '{} and child unit type '{}'", parentUnitType.toString(), childUnitType.toString());
-        this.parentColumn = ("p_" + parentUnitType.toString()).getBytes();
+        this.parentColumn = (PARENT_COLUMN_PREFIX + parentUnitType.toString()).getBytes();
         this.childColumnValue = (childUnitType.toString()).getBytes();
     }
 
@@ -69,7 +66,7 @@ public class UnitLinksKVMapper extends AbstractUnitDataKVMapper {
     private void writeParentChildRows(Context context, UnitType parentUnitType, String parentKey, UnitType childUnitType, String childKey) throws IOException, InterruptedException {
         // Write parent row
         String rowKeyStr = RowKeyUtils.createRowKey(getReferencePeriod(), parentKey, parentUnitType.toString());
-        writeColumnValue(context, rowKeyStr, childKey.getBytes(), childColumnValue);
+        writeColumnValue(context, rowKeyStr, (CHILD_COLUMN_PREFIX + childKey).getBytes(), childColumnValue);
 
         // Write child row
         rowKeyStr = RowKeyUtils.createRowKey(getReferencePeriod(), childKey, childUnitType.toString());

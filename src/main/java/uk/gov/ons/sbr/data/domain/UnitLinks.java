@@ -10,7 +10,7 @@ import java.util.Map;
 
 /**
  * Represent the parent and child hierarchy in terms of links between statistical units
- * Note that child links are represented in Json format
+ * Note that child links are also represented in Json format (to support multiple schema designs)
  */
 public class UnitLinks extends AbstractPeriodEntity {
 
@@ -21,6 +21,7 @@ public class UnitLinks extends AbstractPeriodEntity {
     public UnitLinks(YearMonth referencePeriod, String key) {
         super(referencePeriod, key);
         this.parents = new EnumMap<>(UnitType.class);
+        this.children = new HashMap<>();
         this.childJsonString = StringUtils.EMPTY;
     }
 

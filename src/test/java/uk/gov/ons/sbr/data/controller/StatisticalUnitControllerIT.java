@@ -60,7 +60,7 @@ public class StatisticalUnitControllerIT extends AbstractHBaseIT {
         parents = new HashMap<>();
         parents.put(UnitType.ENTERPRISE, TEST_ENTERPRISE_REFERENCE_NUMBER);
         parents.put(UnitType.LEGAL_UNIT, TEST_KEY);
-        controller.updateUnitLinks(TEST_REFERENCE_PERIOD, TEST_KEY, UnitType.VAT, parents, null);
+        controller.updateUnitLinks(TEST_REFERENCE_PERIOD, TEST_KEY, UnitType.VAT, parents, (String)null);
 
         // Find Units
         matchingUnits = controller.findUnits(TEST_REFERENCE_PERIOD, TEST_KEY);
