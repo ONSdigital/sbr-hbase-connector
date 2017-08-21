@@ -4,14 +4,16 @@ import uk.gov.ons.sbr.data.domain.UnitType;
 
 public class PayeDataKVMapper extends AbstractUnitDataKVMapper {
 
+    private static final String[] HEADER = {"entref"};
+
     @Override
-    protected UnitType getUnitType() {
-        return UnitType.PAYE;
+    protected String[] getHeaderStrings() {
+        return HEADER;
     }
 
     @Override
-    protected String getHeaderString() {
-        return "entref";
+    protected UnitType getUnitType() {
+        return UnitType.PAYE;
     }
 
     @Override

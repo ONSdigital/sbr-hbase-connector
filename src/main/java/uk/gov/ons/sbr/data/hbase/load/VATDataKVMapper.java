@@ -4,14 +4,16 @@ import uk.gov.ons.sbr.data.domain.UnitType;
 
 public class VATDataKVMapper extends AbstractUnitDataKVMapper {
 
+    private static final String[] HEADER = {"entref"};
+
     @Override
-    protected UnitType getUnitType() {
-        return UnitType.VAT;
+    protected String[] getHeaderStrings() {
+        return HEADER;
     }
 
     @Override
-    protected String getHeaderString() {
-        return "entref";
+    protected UnitType getUnitType() {
+        return UnitType.VAT;
     }
 
     @Override

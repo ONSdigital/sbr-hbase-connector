@@ -43,4 +43,15 @@ public class UnitController {
         unitLinksDAO.putUnitLinks(updatedLinks, type);
     }
 
+    public void updateUnitLinks(YearMonth referencePeriod, String unitKey, UnitType type, Map<UnitType, String> parents, Map<String, UnitType> children) throws Exception {
+        UnitLinks updatedLinks = new UnitLinks(referencePeriod, unitKey);
+        if (parents != null) {
+            updatedLinks.setParents(parents);
+        }
+        if (children != null) {
+            updatedLinks.setChildren(children);
+        }
+        unitLinksDAO.putUnitLinks(updatedLinks, type);
+    }
+
 }

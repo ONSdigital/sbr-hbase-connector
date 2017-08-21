@@ -1,17 +1,14 @@
 package uk.gov.ons.sbr.data.hbase.load;
 
-import com.google.common.base.Function;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.hbase.mapreduce.*;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
@@ -26,13 +23,10 @@ import uk.gov.ons.sbr.data.hbase.util.RowKeyUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.Period;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 
 /**
  * HBase bulk import example<br>
@@ -47,6 +41,7 @@ import java.util.Date;
 public class BulkLoader extends Configured implements Tool {
 
     static final String REFERENCE_PERIOD = "REFERENCE_PERIOD";
+    static final String UNIT_SEPARATOR = "~";
     private static final int SUCCESS = 0;
     private static final int ERROR = -1;
     private static final int MIN_ARGS = 3;
@@ -55,12 +50,12 @@ public class BulkLoader extends Configured implements Tool {
     private static final int ARG_REFERENCE_PERIOD = 1;
     private static final int ARG_CSV_FILE = 2;
     private static final int ARG_HFILE_OUT_DIR = 3;
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractUnitDataKVMapper.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(BulkLoader.class.getName());
 
 
     @Override
     public int run(String[] strings) throws Exception {
-        if (strings.length < MIN_ARGS || strings.length > MAX_ARGS ) {
+        if (strings.length < MIN_ARGS || strings.length > MAX_ARGS) {
             System.out.println("INVALID ARGS, expected: load type, period, csv input file path, hfile output path (optional)");
         }
         try {
@@ -70,23 +65,32 @@ public class BulkLoader extends Configured implements Tool {
             LOG.error("Cannot parse reference period with value '{}'. Format should be '{}'", strings[ARG_REFERENCE_PERIOD], RowKeyUtils.getReferencePeriodFormat());
             System.exit(ERROR);
         }
-        UnitType unitType = UnitType.fromString(strings[ARG_LOAD_TYPE]);
+
+        // Parse unit type
+        String[] unitTypes = strings[ARG_LOAD_TYPE].split(UNIT_SEPARATOR);
+        UnitType unitType = UnitType.fromString(unitTypes[0]);
+        UnitType childUnitType = UnitType.UNKNOWN;
+        if (unitTypes.length > 1) {
+            childUnitType = UnitType.fromString(unitTypes[1]);
+            LOG.info("Loading linked data with parent unit type '{} and child unit type '{}'", unitType.toString(), childUnitType.toString());
+        }
+
         if (unitType.equals(UnitType.UNKNOWN)) {
             LOG.error("Unknown unit type " + strings[ARG_LOAD_TYPE]);
             System.exit(ERROR);
         }
         if (strings.length == MIN_ARGS) {
-            return (load(unitType, strings[ARG_REFERENCE_PERIOD], strings[ARG_CSV_FILE]));
+            return (load(unitType, childUnitType, strings[ARG_REFERENCE_PERIOD], strings[ARG_CSV_FILE]));
         } else {
-            return load(unitType, strings[ARG_REFERENCE_PERIOD], strings[ARG_CSV_FILE], strings[ARG_HFILE_OUT_DIR]);
+            return load(unitType, childUnitType, strings[ARG_REFERENCE_PERIOD], strings[ARG_CSV_FILE], strings[ARG_HFILE_OUT_DIR]);
         }
     }
 
-    private int load(UnitType unitType, String referencePeriod, String inputFile) {
-        return load(unitType, referencePeriod, inputFile, "");
+    private int load(UnitType unitType, UnitType childUnitType, String referencePeriod, String inputFile) {
+        return load(unitType, childUnitType, referencePeriod, inputFile, "");
     }
 
-    private int load(UnitType unitType, String referencePeriod, String inputFile, String outputFilePath) {
+    private int load(UnitType unitType, UnitType childUnitType, String referencePeriod, String inputFile, String outputFilePath) {
 
         LOG.info("Starting bulk load of {} data for reference period '{}'", unitType.toString(), referencePeriod);
 
@@ -95,10 +99,19 @@ public class BulkLoader extends Configured implements Tool {
         Connection connection;
         Job job;
         try {
-            TableName tableName = TableNames.forUnitType(unitType);
-            Class<? extends Mapper> mapper = KVMapperFactory.getKVMapper(unitType);
             connection = HBaseConnector.getInstance().getConnection();
             Configuration conf = this.getConf();
+            TableName tableName;
+            Class<? extends Mapper> mapper;
+            if (childUnitType.equals(UnitType.UNKNOWN)) {
+                tableName = TableNames.forUnitType(unitType);
+                mapper = KVMapperFactory.getKVMapper(unitType);
+            } else {
+                tableName = TableNames.UNIT_LINKS.getTableName();
+                mapper = KVMapperFactory.getKVMapper(unitType, childUnitType);
+                conf.set("parent.unit.type", unitType.toString());
+                conf.set("child.unit.type", childUnitType.toString());
+            }
             job = Job.getInstance(conf, String.format("SBR %s Data Import", unitType.toString()));
             job.setJarByClass(mapper);
             job.setMapperClass(mapper);

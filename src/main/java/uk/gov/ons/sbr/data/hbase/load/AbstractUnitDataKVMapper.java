@@ -41,9 +41,13 @@ public abstract class AbstractUnitDataKVMapper extends
     private byte[][] columnNames;
     private byte[] columnFamily;
 
+    public YearMonth getReferencePeriod() {
+        return referencePeriod;
+    }
+
     protected abstract UnitType getUnitType();
 
-    protected abstract String getHeaderString();
+    protected abstract String[] getHeaderStrings();
 
     protected abstract int getRowKeyFieldPosition();
 
@@ -51,13 +55,21 @@ public abstract class AbstractUnitDataKVMapper extends
         return true;
     }
 
+    protected byte[][] getColumnNames() {
+        return ColumnNames.forUnitType(getUnitType());
+    }
+
+    protected byte[] getColumnFamily() {
+        return ColumnFamilies.forUnitType(getUnitType());
+    }
+
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
         if (!useCsvHeaderAsColumnNames()) {
-            columnNames = ColumnNames.forUnitType(getUnitType());
             LOG.debug("Using pre-defined column headers for {} file not those in the csv file", getUnitType());
+            columnNames = getColumnNames();
         }
-        columnFamily = ColumnFamilies.forUnitType(getUnitType());
+        columnFamily = getColumnFamily();
         String periodStr = System.getProperty(REFERENCE_PERIOD);
         try {
             referencePeriod = YearMonth.parse(periodStr, DateTimeFormatter.ofPattern(RowKeyUtils.getReferencePeriodFormat()));
@@ -70,51 +82,87 @@ public abstract class AbstractUnitDataKVMapper extends
 
     @Override
     protected void map(LongWritable key, Text value, Context context) throws InterruptedException, IOException {
-        if (value.find(getHeaderString()) > -1) {
-            if (useCsvHeaderAsColumnNames()) {
-                LOG.debug("Found csv header row: {}", value.toString());
-                LOG.debug("Using header row as table column names");
-                try {
-                    String[] columnNameStrs = csvParser.parseLine(value.toString().trim());
-                    List<byte[]> byteList = Arrays.stream(columnNameStrs).map(String::getBytes).collect(Collectors.toList());
-                    columnNames = byteList.toArray(new byte[0][0]);
-                } catch (Exception e) {
-                    LOG.error("Cannot parse column headers, error is: {}", e);
-                    throw e;
-                }
-            }
-            // Skip header
-            return;
-        }
 
-        String[] fields;
+        // Skip header
+        if (isHeaderRow(value)) return;
+
+        String[] fields = parseLine(value, context);
+        if (fields == null) return;
+
+        // Key: e.g. "2017-06~07382019"
+        String rowKeyStr = RowKeyUtils.createRowKey(referencePeriod, fields[getRowKeyFieldPosition()]);
+        writeRow(context, rowKeyStr, fields);
+    }
+
+    protected boolean isHeaderRow(Text value) throws IOException {
+        for (String headerString : getHeaderStrings()) {
+            if (value.find(headerString) > -1) {
+                if (useCsvHeaderAsColumnNames()) {
+                    LOG.debug("Found csv header row: {}", value.toString());
+                    LOG.debug("Using header row as table column names");
+                    try {
+                        String[] columnNameStrs = csvParser.parseLine(value.toString().trim());
+                        List<byte[]> byteList = Arrays.stream(columnNameStrs).map(String::getBytes).collect(Collectors.toList());
+                        columnNames = byteList.toArray(new byte[0][0]);
+                    } catch (Exception e) {
+                        LOG.error("Cannot parse column headers, error is: {}", e);
+                        throw e;
+                    }
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected String[] parseLine(Text value, Context context) {
         try {
-            fields = csvParser.parseLine(value.toString());
+            return csvParser.parseLine(value.toString());
         } catch (Exception e) {
             LOG.error("Cannot parse line '{}', error is: {}", value.toString(), e.getMessage());
             context.getCounter(this.getClass().getSimpleName(), "PARSE_ERRORS").increment(1);
-            return;
+            return null;
         }
+    }
 
+    protected void writeRow(Context context, String rowKeyStr, String[] fields) throws IOException, InterruptedException {
         ImmutableBytesWritable rowKey = new ImmutableBytesWritable();
-        KeyValue kv;
 
-        // Key: e.g. "2017-06~07382019"
-        rowKey.set(RowKeyUtils.createRowKey(referencePeriod, fields[getRowKeyFieldPosition()])
-                .getBytes());
+        rowKey.set(rowKeyStr.getBytes());
         Put put = new Put(rowKey.copyBytes());
 
         for (int i = 0; i < fields.length; i++) {
             if (!fields[i].isEmpty()) {
                 try {
-                    kv = new KeyValue(rowKey.get(), columnFamily, columnNames[i], fields[i].getBytes());
-                    put.add(kv);
+                    put.add(new KeyValue(rowKey.get(), columnFamily, columnNames[i], fields[i].getBytes()));
                 } catch (Exception e) {
-                    LOG.error("Cannot write line '{}'", value.toString(), e);
+                    LOG.error("Cannot write line '{}'", fields[0], e);
                     throw e;
                 }
             }
         }
         context.write(rowKey, put);
     }
+
+    protected void writeColumnValue(Context context, String rowKeyStr, byte[] column, String valueStr) throws IOException, InterruptedException {
+        if (!valueStr.isEmpty()) {
+            writeColumnValue(context, rowKeyStr, column, valueStr.getBytes());
+        }
+    }
+
+    protected void writeColumnValue(Context context, String rowKeyStr, byte[] column, byte[] value) throws IOException, InterruptedException {
+        ImmutableBytesWritable rowKey = new ImmutableBytesWritable();
+
+        rowKey.set(rowKeyStr.getBytes());
+        Put put = new Put(rowKey.copyBytes());
+        try {
+            put.add(new KeyValue(rowKey.get(), columnFamily, column, value));
+        } catch (Exception e) {
+            LOG.error("Cannot write line '{}'", value, e);
+            throw e;
+        }
+
+        context.write(rowKey, put);
+    }
+
 }
