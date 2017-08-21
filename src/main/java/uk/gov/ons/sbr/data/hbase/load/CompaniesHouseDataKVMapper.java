@@ -4,6 +4,13 @@ import uk.gov.ons.sbr.data.domain.UnitType;
 
 public class CompaniesHouseDataKVMapper extends AbstractUnitDataKVMapper {
 
+    private static final String[] HEADER = {"CompanyName"};
+
+    @Override
+    protected String[] getHeaderStrings() {
+        return HEADER;
+    }
+
     @Override
     protected boolean useCsvHeaderAsColumnNames() {
         return false;
@@ -12,11 +19,6 @@ public class CompaniesHouseDataKVMapper extends AbstractUnitDataKVMapper {
     @Override
     protected UnitType getUnitType() {
         return UnitType.COMPANY_REGISTRATION;
-    }
-
-    @Override
-    protected String getHeaderString() {
-        return "CompanyName";
     }
 
     @Override

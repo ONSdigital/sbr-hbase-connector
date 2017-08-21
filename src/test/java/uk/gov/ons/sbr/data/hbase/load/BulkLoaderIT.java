@@ -29,6 +29,7 @@ public class BulkLoaderIT extends AbstractHBaseIT {
     private static final String TEST_PAYE_CSV = "src/test/resources/input/paye-data.csv";
     private static final String TEST_VAT_CSV = "src/test/resources/input/vat-data.csv";
     private static final String TEST_ENT_LEU_LINKS_CSV = "src/test/resources/input/ent-leu-links.csv";
+    private static final String TEST_LEU_VAT_LINKS_CSV = "src/test/resources/input/leu-vat-links.csv";
     private BulkLoader bulkLoader = new BulkLoader();
     private AdminDataController adminDataController = new AdminDataController();
     private UnitController unitController = new UnitController();
@@ -88,6 +89,20 @@ public class BulkLoaderIT extends AbstractHBaseIT {
         assertTrue("No unit record found", unit.isPresent());
 
         assertEquals("No record found", "9900000005", unit.get().get(0).getKey());
+    }
+
+    @Test
+    public void loadLeuVatLinksData() throws Exception {
+        File file = new File(TEST_LEU_VAT_LINKS_CSV);
+        assertTrue("Test file not found", file.exists());
+
+        int result = loadData(new String[]{UnitType.LEGAL_UNIT.toString()+UNIT_SEPARATOR+UnitType.VAT.toString(), TEST_PERIOD_STR, TEST_LEU_VAT_LINKS_CSV});
+        assertEquals("Bulk load failed", 0, result);
+
+        Optional<List<StatisticalUnit>> unit = unitController.findUnits("551392773603");
+        assertTrue("No unit record found", unit.isPresent());
+
+        assertEquals("No record found", "551392773603", unit.get().get(0).getKey());
     }
 
     public int loadData (String[] args) throws Exception {

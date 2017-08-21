@@ -47,7 +47,7 @@ public abstract class AbstractUnitDataKVMapper extends
 
     protected abstract UnitType getUnitType();
 
-    protected abstract String getHeaderString();
+    protected abstract String[] getHeaderStrings();
 
     protected abstract int getRowKeyFieldPosition();
 
@@ -95,20 +95,22 @@ public abstract class AbstractUnitDataKVMapper extends
     }
 
     protected boolean isHeaderRow(Text value) throws IOException {
-        if (value.find(getHeaderString()) > -1) {
-            if (useCsvHeaderAsColumnNames()) {
-                LOG.debug("Found csv header row: {}", value.toString());
-                LOG.debug("Using header row as table column names");
-                try {
-                    String[] columnNameStrs = csvParser.parseLine(value.toString().trim());
-                    List<byte[]> byteList = Arrays.stream(columnNameStrs).map(String::getBytes).collect(Collectors.toList());
-                    columnNames = byteList.toArray(new byte[0][0]);
-                } catch (Exception e) {
-                    LOG.error("Cannot parse column headers, error is: {}", e);
-                    throw e;
+        for (String headerString : getHeaderStrings()) {
+            if (value.find(headerString) > -1) {
+                if (useCsvHeaderAsColumnNames()) {
+                    LOG.debug("Found csv header row: {}", value.toString());
+                    LOG.debug("Using header row as table column names");
+                    try {
+                        String[] columnNameStrs = csvParser.parseLine(value.toString().trim());
+                        List<byte[]> byteList = Arrays.stream(columnNameStrs).map(String::getBytes).collect(Collectors.toList());
+                        columnNames = byteList.toArray(new byte[0][0]);
+                    } catch (Exception e) {
+                        LOG.error("Cannot parse column headers, error is: {}", e);
+                        throw e;
+                    }
                 }
+                return true;
             }
-            return true;
         }
         return false;
     }

@@ -18,6 +18,7 @@ public class UnitLinksKVMapper extends AbstractUnitDataKVMapper {
     private UnitType childUnitType;
     private byte[] parentColumn;
     private byte[] childColumnValue;
+    private static final String[] HEADER = {"entref", "UBRN"};
 
     @Override
     protected UnitType getUnitType() {
@@ -25,8 +26,8 @@ public class UnitLinksKVMapper extends AbstractUnitDataKVMapper {
     }
 
     @Override
-    protected String getHeaderString() {
-        return "entref";
+    protected String[] getHeaderStrings() {
+        return HEADER;
     }
 
     @Override
