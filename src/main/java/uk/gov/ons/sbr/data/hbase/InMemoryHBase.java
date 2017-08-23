@@ -13,7 +13,7 @@ import uk.gov.ons.sbr.data.hbase.table.TableNames;
  */
 public class InMemoryHBase {
 
-    private static final Logger LOG = LoggerFactory.getLogger(HBaseEnterpriseDAO.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(InMemoryHBase.class.getName());
     private static HBaseTestingUtility hBaseTestingUtility;
 
     public static Configuration init() throws Exception {

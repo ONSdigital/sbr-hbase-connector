@@ -15,7 +15,7 @@ class AbstractHBaseDAO {
 
     Connection getConnection() throws Exception {
         if (connection != null) return connection;
-        connection = this.connection = HBaseConnector.getInstance().getConnection();
+        this.connection = HBaseConnector.getInstance().getConnection();
         return connection;
     }
 

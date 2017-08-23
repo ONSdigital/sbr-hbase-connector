@@ -3,6 +3,7 @@ package uk.gov.ons.sbr.data.hbase.load;
 import org.apache.hadoop.util.ToolRunner;
 import org.junit.Test;
 import uk.gov.ons.sbr.data.controller.AdminDataController;
+import uk.gov.ons.sbr.data.controller.EnterpriseController;
 import uk.gov.ons.sbr.data.controller.UnitController;
 import uk.gov.ons.sbr.data.domain.*;
 import uk.gov.ons.sbr.data.hbase.AbstractHBaseIT;
@@ -28,11 +29,13 @@ public class BulkLoaderIT extends AbstractHBaseIT {
     private static final String TEST_CH_CSV = "src/test/resources/input/sbr-2500-ent-ch-data.csv";
     private static final String TEST_PAYE_CSV = "src/test/resources/input/paye-data.csv";
     private static final String TEST_VAT_CSV = "src/test/resources/input/vat-data.csv";
+    private static final String TEST_ENT_CSV = "src/test/resources/input/enterprise-data.csv";
     private static final String TEST_ENT_LEU_LINKS_CSV = "src/test/resources/input/ent-leu-links.csv";
     private static final String TEST_LEU_VAT_LINKS_CSV = "src/test/resources/input/leu-vat-links.csv";
     private BulkLoader bulkLoader = new BulkLoader();
     private AdminDataController adminDataController = new AdminDataController();
     private UnitController unitController = new UnitController();
+    private EnterpriseController enterpriseController = new EnterpriseController();
 
 
     @Test
@@ -75,6 +78,20 @@ public class BulkLoaderIT extends AbstractHBaseIT {
         assertTrue("No VAT record found", vatReturn.isPresent());
 
         assertEquals("No VAT record found", "808281648666", vatReturn.get().getKey());
+    }
+
+    @Test
+    public void loadEnterpriseData() throws Exception {
+        File file = new File(TEST_ENT_CSV);
+        assertTrue("Test file not found", file.exists());
+
+        int result = loadData(new String[]{UnitType.ENTERPRISE.toString(), TEST_PERIOD_STR, TEST_ENT_CSV});
+        assertEquals("Bulk load failed", 0, result);
+
+        Optional<Enterprise> enterprise = enterpriseController.getEnterpriseForReferencePeriod(TEST_PERIOD, "9900180087");
+        assertTrue("No enterprise record found", enterprise.isPresent());
+
+        assertEquals("No enterprise record found", "9900180087", enterprise.get().getKey());
     }
 
     @Test
