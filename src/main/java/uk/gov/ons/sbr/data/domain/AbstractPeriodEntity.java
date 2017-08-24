@@ -1,5 +1,8 @@
 package uk.gov.ons.sbr.data.domain;
 
+import org.apache.htrace.fasterxml.jackson.annotation.JsonIgnore;
+import org.apache.htrace.fasterxml.jackson.annotation.JsonProperty;
+
 import java.time.YearMonth;
 
 /**
@@ -7,7 +10,9 @@ import java.time.YearMonth;
  */
 public abstract class AbstractPeriodEntity {
 
+    @JsonIgnore
     private YearMonth referencePeriod;
+    @JsonProperty("id")
     private String key;
 
     public AbstractPeriodEntity (YearMonth referencePeriod, String key) {

@@ -99,7 +99,7 @@ public class HBaseStatisticalUnitLinksDAO extends AbstractHBaseDAO implements St
                 links.setChildJsonString(value);
             } else if (column.startsWith(CHILD_COLUMN_PREFIX)) {
                 LOG.debug("Found unit link child '{}' of type '{}'", column, value);
-                links.putChild(UnitType.fromString(column.substring(CHILD_COLUMN_PREFIX.length())), value);
+                links.putChild(UnitType.fromString(value), column.substring(CHILD_COLUMN_PREFIX.length()));
             } else {
                 LOG.debug("Found unit link column '{}' with value '{}' - IGNORING", column, value);
             }

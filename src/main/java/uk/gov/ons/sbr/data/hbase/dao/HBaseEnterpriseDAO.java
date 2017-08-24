@@ -36,5 +36,6 @@ public class HBaseEnterpriseDAO extends HBaseStatisticalUnitDAO implements Enter
     public void putEnterprise(Enterprise enterprise) throws Exception {
         putUnit(enterprise);
     }
+
 }
 
