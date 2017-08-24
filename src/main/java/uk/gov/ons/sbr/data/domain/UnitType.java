@@ -1,24 +1,34 @@
 package uk.gov.ons.sbr.data.domain;
 
+import org.apache.htrace.fasterxml.jackson.annotation.JsonValue;
+
+import java.util.Collections;
+import java.util.List;
+
+import static java.util.Arrays.*;
+
 /**
  * Unit types
  */
 public enum UnitType {
 
-    COMPANY_REGISTRATION("CH"),
-    ENTERPRISE("ENT"),
-    LEGAL_UNIT("LEU"),
-    PAYE("PAYE"),
-    UNKNOWN("UNKNOWN"),
-    VAT("VAT");
+    COMPANY_REGISTRATION("CH", Collections.emptyList()),
+    PAYE("PAYE", Collections.emptyList()),
+    UNKNOWN("UNKNOWN", Collections.emptyList()),
+    VAT("VAT", Collections.emptyList()),
+    LEGAL_UNIT("LEU", asList(UnitType.COMPANY_REGISTRATION, UnitType.PAYE, UnitType.VAT)),
+    ENTERPRISE("ENT", Collections.singletonList(UnitType.LEGAL_UNIT));
 
     private final String value;
+    private final List<UnitType> directDescendants;
 
-    UnitType(final String value) {
+    UnitType(final String value, final List<UnitType> directDescendants) {
         this.value = value;
+        this.directDescendants = directDescendants;
     }
 
     @Override
+    @JsonValue
     public String toString() {
         return value;
     }
@@ -30,5 +40,9 @@ public enum UnitType {
             }
         }
         return UNKNOWN;
+    }
+
+    public List<UnitType> getDirectDescendants() {
+        return directDescendants;
     }
 }

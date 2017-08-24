@@ -1,7 +1,12 @@
 package uk.gov.ons.sbr.data.domain;
 
+import org.apache.htrace.fasterxml.jackson.annotation.JsonIgnore;
+import org.apache.htrace.fasterxml.jackson.annotation.JsonProperty;
+
 import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -13,14 +18,19 @@ import java.util.Map;
 public class StatisticalUnit extends AbstractPeriodEntity {
 
     private UnitType type;
+    @JsonIgnore
     private Map<String, String> variables;
+    @JsonIgnore
     private UnitLinks links;
+    @JsonProperty("children")
+    private List<StatisticalUnit> children;
 
     public StatisticalUnit(YearMonth referencePeriod, String key, UnitType type) {
         super(referencePeriod, key);
         this.type = type;
         this.variables = new HashMap<>();
         this.links = new UnitLinks(referencePeriod, key);
+        this.children = new ArrayList<>();
     }
 
     public UnitType getType() {
@@ -45,5 +55,17 @@ public class StatisticalUnit extends AbstractPeriodEntity {
 
     public void setLinks(UnitLinks links) {
         this.links = links;
+    }
+
+    public List<StatisticalUnit> getChildren() {
+        return children;
+    }
+
+    public void addChild(StatisticalUnit newChild) {
+        children.add(newChild);
+    }
+
+    public String toUnitHierarchyAsJson() {
+        return UnitJSONConverter.toJson(this);
     }
 }
