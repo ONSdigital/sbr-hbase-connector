@@ -8,7 +8,6 @@ import uk.gov.ons.sbr.data.controller.UnitController;
 import uk.gov.ons.sbr.data.domain.*;
 import uk.gov.ons.sbr.data.hbase.AbstractHBaseIT;
 import uk.gov.ons.sbr.data.hbase.HBaseConnector;
-import uk.gov.ons.sbr.data.hbase.InMemoryHBase;
 import uk.gov.ons.sbr.data.hbase.util.RowKeyUtils;
 
 import java.io.File;
@@ -80,19 +79,7 @@ public class BulkLoaderIT extends AbstractHBaseIT {
         assertEquals("No VAT record found", "808281648666", vatReturn.get().getKey());
     }
 
-    @Test
-    public void loadEnterpriseData() throws Exception {
-        File file = new File(TEST_ENT_CSV);
-        assertTrue("Test file not found", file.exists());
 
-        int result = loadData(new String[]{UnitType.ENTERPRISE.toString(), TEST_PERIOD_STR, TEST_ENT_CSV});
-        assertEquals("Bulk load failed", 0, result);
-
-        Optional<Enterprise> enterprise = enterpriseController.getEnterpriseForReferencePeriod(TEST_PERIOD, "9900180087");
-        assertTrue("No enterprise record found", enterprise.isPresent());
-
-        assertEquals("No enterprise record found", "9900180087", enterprise.get().getKey());
-    }
 
     @Test
     public void loadEntLeuLinksData() throws Exception {
@@ -106,6 +93,8 @@ public class BulkLoaderIT extends AbstractHBaseIT {
         assertTrue("No unit record found", unit.isPresent());
 
         assertEquals("No record found", "9900000005", unit.get().get(0).getKey());
+        assertEquals("No record found", "100000000011", unit.get().get(0).getLinks().getChildren().keySet().iterator().next());
+        assertEquals("No record found", UnitType.LEGAL_UNIT, unit.get().get(0).getLinks().getChildren().values().iterator().next());
     }
 
     @Test
@@ -120,6 +109,26 @@ public class BulkLoaderIT extends AbstractHBaseIT {
         assertTrue("No unit record found", unit.isPresent());
 
         assertEquals("No record found", "551392773603", unit.get().get(0).getKey());
+    }
+
+    @Test
+    public void loadEnterpriseData() throws Exception {
+        File file = new File(TEST_ENT_CSV);
+        assertTrue("Test file not found", file.exists());
+
+        int result = loadData(new String[]{UnitType.ENTERPRISE.toString()+UNIT_SEPARATOR+UnitType.LEGAL_UNIT.toString(), TEST_PERIOD_STR, TEST_ENT_LEU_LINKS_CSV});
+        assertEquals("Bulk load failed", 0, result);
+        result = loadData(new String[]{UnitType.LEGAL_UNIT.toString()+UNIT_SEPARATOR+UnitType.VAT.toString(), TEST_PERIOD_STR, TEST_LEU_VAT_LINKS_CSV});
+        assertEquals("Bulk load failed", 0, result);
+        result = loadData(new String[]{UnitType.ENTERPRISE.toString(), TEST_PERIOD_STR, TEST_ENT_CSV});
+        assertEquals("Bulk load failed", 0, result);
+
+        Optional<Enterprise> enterprise = enterpriseController.getEnterpriseForReferencePeriod(TEST_PERIOD, "9900000001");
+        assertTrue("No enterprise record found", enterprise.isPresent());
+
+        assertEquals("No enterprise record found", "9900000001", enterprise.get().getKey());
+
+        assertEquals("{\"type\":\"ENT\",\"id\":\"9900000001\",\"children\":[{\"type\":\"LEU\",\"id\":\"100000000003\",\"children\":[{\"type\":\"VAT\",\"id\":\"976132369059\"}]},{\"type\":\"LEU\",\"id\":\"100000000002\",\"children\":[{\"type\":\"VAT\",\"id\":\"346942023239\"}]},{\"type\":\"LEU\",\"id\":\"100000000001\",\"children\":[{\"type\":\"VAT\",\"id\":\"397585634298\"}]}]}", enterprise.get().toUnitHierarchyAsJson());
     }
 
     public int loadData (String[] args) throws Exception {
