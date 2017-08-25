@@ -1,6 +1,5 @@
 package uk.gov.ons.sbr.data.domain;
 
-import io.netty.handler.codec.http.HttpResponseStatus;
 import org.apache.commons.lang.StringUtils;
 
 import java.time.YearMonth;

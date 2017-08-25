@@ -7,7 +7,7 @@ import uk.gov.ons.sbr.data.domain.UnitType;
 
 import java.time.YearMonth;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class RowKeyUtilsTest {
 

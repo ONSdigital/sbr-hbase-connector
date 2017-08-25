@@ -7,7 +7,6 @@ import uk.gov.ons.sbr.data.domain.VATReturn;
 import uk.gov.ons.sbr.data.hbase.dao.HBaseAdminDataDAO;
 import uk.gov.ons.sbr.data.hbase.util.ReferencePeriodUtils;
 
-import java.io.IOException;
 import java.time.YearMonth;
 import java.util.Optional;
 

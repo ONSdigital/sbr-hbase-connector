@@ -4,7 +4,6 @@ import uk.gov.ons.sbr.data.domain.CompanyRegistration;
 import uk.gov.ons.sbr.data.domain.PAYEReturn;
 import uk.gov.ons.sbr.data.domain.VATReturn;
 
-import java.io.IOException;
 import java.time.YearMonth;
 import java.util.Optional;
 

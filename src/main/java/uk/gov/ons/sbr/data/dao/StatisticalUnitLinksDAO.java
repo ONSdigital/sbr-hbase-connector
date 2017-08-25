@@ -4,7 +4,6 @@ import uk.gov.ons.sbr.data.domain.StatisticalUnit;
 import uk.gov.ons.sbr.data.domain.UnitLinks;
 import uk.gov.ons.sbr.data.domain.UnitType;
 
-import java.io.IOException;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;

@@ -13,12 +13,10 @@ import org.mockito.Captor;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.ons.sbr.data.dao.EnterpriseDAO;
 import uk.gov.ons.sbr.data.hbase.table.ColumnFamilies;
 import uk.gov.ons.sbr.data.hbase.table.TableNames;
 import uk.gov.ons.sbr.data.hbase.util.RowKeyUtils;
 
-import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;

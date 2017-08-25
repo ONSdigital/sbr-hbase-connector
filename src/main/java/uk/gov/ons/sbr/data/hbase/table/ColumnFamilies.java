@@ -1,6 +1,5 @@
 package uk.gov.ons.sbr.data.hbase.table;
 
-import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.util.Bytes;
 import uk.gov.ons.sbr.data.domain.UnitType;
 
@@ -11,6 +10,7 @@ public enum ColumnFamilies {
 
     COMPANY_DATA("d"),
     ENTERPRISE_DATA("d"),
+    LOCAL_UNIT_DATA("d"),
     PAYE_DATA("d"),
     UNIT_LINKS_DATA("d"),
     VAT_DATA("d");
@@ -31,6 +31,8 @@ public enum ColumnFamilies {
                 return COMPANY_DATA.getColumnFamily();
             case ENTERPRISE:
                 return ENTERPRISE_DATA.getColumnFamily();
+            case LOCAL_UNIT:
+                return LOCAL_UNIT_DATA.getColumnFamily();
             case PAYE:
                 return PAYE_DATA.getColumnFamily();
             case VAT:

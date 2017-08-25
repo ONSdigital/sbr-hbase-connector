@@ -4,7 +4,6 @@ import org.junit.Before;
 import org.junit.Test;
 import uk.gov.ons.sbr.data.domain.Enterprise;
 
-import java.io.IOException;
 import java.time.Month;
 import java.time.YearMonth;
 import java.util.HashMap;
