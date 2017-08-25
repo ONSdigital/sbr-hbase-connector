@@ -12,6 +12,8 @@ public class KVMapperFactory {
                 return CompaniesHouseDataKVMapper.class;
             case ENTERPRISE:
                 return EnterpriseDataKVMapper.class;
+            case LOCAL_UNIT:
+                return LocalUnitDataKVMapper.class;
             case PAYE:
                 return PayeDataKVMapper.class;
             case VAT:

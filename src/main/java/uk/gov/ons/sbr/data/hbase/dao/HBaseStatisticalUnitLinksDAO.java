@@ -15,7 +15,6 @@ import uk.gov.ons.sbr.data.hbase.table.ColumnFamilies;
 import uk.gov.ons.sbr.data.hbase.table.TableNames;
 import uk.gov.ons.sbr.data.hbase.util.RowKeyUtils;
 
-import java.io.IOException;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;

@@ -1,10 +1,7 @@
 package uk.gov.ons.sbr.data.hbase.dao;
 
-import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.Connection;
 import uk.gov.ons.sbr.data.hbase.HBaseConnector;
-
-import java.io.IOException;
 
 /**
  * DAO with a connection to HBase

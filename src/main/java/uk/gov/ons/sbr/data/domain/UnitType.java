@@ -5,7 +5,7 @@ import org.apache.htrace.fasterxml.jackson.annotation.JsonValue;
 import java.util.Collections;
 import java.util.List;
 
-import static java.util.Arrays.*;
+import static java.util.Arrays.asList;
 
 /**
  * Unit types
@@ -17,7 +17,8 @@ public enum UnitType {
     UNKNOWN("UNKNOWN", Collections.emptyList()),
     VAT("VAT", Collections.emptyList()),
     LEGAL_UNIT("LEU", asList(UnitType.COMPANY_REGISTRATION, UnitType.PAYE, UnitType.VAT)),
-    ENTERPRISE("ENT", Collections.singletonList(UnitType.LEGAL_UNIT));
+    LOCAL_UNIT("LOU", Collections.emptyList()),
+    ENTERPRISE("ENT", asList(UnitType.LEGAL_UNIT, UnitType.LOCAL_UNIT));
 
     private final String value;
     private final List<UnitType> directDescendants;

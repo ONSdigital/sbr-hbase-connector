@@ -2,7 +2,6 @@ package uk.gov.ons.sbr.data.hbase.dao;
 
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
-import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
@@ -10,13 +9,12 @@ import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.ons.sbr.data.dao.AdminDataDAO;
-import uk.gov.ons.sbr.data.domain.*;
+import uk.gov.ons.sbr.data.domain.StatisticalUnit;
+import uk.gov.ons.sbr.data.domain.UnitType;
 import uk.gov.ons.sbr.data.hbase.table.ColumnFamilies;
 import uk.gov.ons.sbr.data.hbase.table.TableNames;
 import uk.gov.ons.sbr.data.hbase.util.RowKeyUtils;
 
-import java.io.IOException;
 import java.time.YearMonth;
 import java.util.Optional;
 

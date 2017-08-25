@@ -7,7 +7,6 @@ import uk.gov.ons.sbr.data.domain.UnitType;
 import uk.gov.ons.sbr.data.hbase.dao.HBaseStatisticalUnitLinksDAO;
 import uk.gov.ons.sbr.data.hbase.util.ReferencePeriodUtils;
 
-import java.io.IOException;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;

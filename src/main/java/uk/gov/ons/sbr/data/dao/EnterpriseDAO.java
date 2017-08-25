@@ -2,7 +2,6 @@ package uk.gov.ons.sbr.data.dao;
 
 import uk.gov.ons.sbr.data.domain.Enterprise;
 
-import java.io.IOException;
 import java.time.YearMonth;
 import java.util.Optional;
 

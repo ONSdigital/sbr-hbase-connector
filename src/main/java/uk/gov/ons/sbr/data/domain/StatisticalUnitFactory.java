@@ -16,6 +16,9 @@ public class StatisticalUnitFactory {
             case ENTERPRISE:
                 statisticalUnit = new Enterprise(referencePeriod, key);
                 break;
+            case LOCAL_UNIT:
+                statisticalUnit = new LocalUnit(referencePeriod, key);
+                break;
             case PAYE:
                 statisticalUnit = new PAYEReturn(referencePeriod, key);
                 break;

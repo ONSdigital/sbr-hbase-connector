@@ -1,7 +1,6 @@
 package uk.gov.ons.sbr.data.hbase.load;
 
 import com.opencsv.CSVParser;
-import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
@@ -16,7 +15,6 @@ import uk.gov.ons.sbr.data.hbase.table.ColumnNames;
 import uk.gov.ons.sbr.data.hbase.util.RowKeyUtils;
 
 import java.io.IOException;
-import java.time.Month;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;

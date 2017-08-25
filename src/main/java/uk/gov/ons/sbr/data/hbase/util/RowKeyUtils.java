@@ -1,6 +1,8 @@
 package uk.gov.ons.sbr.data.hbase.util;
 
-import uk.gov.ons.sbr.data.domain.*;
+import uk.gov.ons.sbr.data.domain.StatisticalUnit;
+import uk.gov.ons.sbr.data.domain.StatisticalUnitFactory;
+import uk.gov.ons.sbr.data.domain.UnitType;
 
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
