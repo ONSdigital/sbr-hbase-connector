@@ -12,6 +12,8 @@ import uk.gov.ons.sbr.data.hbase.table.TableNames;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 
 public class HBaseConnector {
@@ -22,11 +24,13 @@ public class HBaseConnector {
     private static final String KERBEROS_PRINCIPAL = "KERBEROS_PRINCIPAL";
     private static final String KERBEROS_KEYTAB = "KERBEROS_KEYTAB";
     private static final String KRB5_CONF = "KRB5";
-    private static final String HBASE_SITE_XML = "HBASE_SITE_XML";
+    private static final String HBASE_CONF_DIR = "hbase.conf.dir";
     private static final String HBASE_CONFIGURATION_ZOOKEEPER_QUORUM = "hbase.zookeeper.quorum";
     private static final String HBASE_CONFIGURATION_ZOOKEEPER_CLIENTPORT = "hbase.zookeeper.property.clientPort";
     private static final String JAVA_SECURITY_KRB5_CONF = "java.security.krb5.conf";
     private static final String HBASE_SECURITY_AUTHENTICATION = "hbase.security.authentication";
+    private static final String HADOOP_SECURITY_AUTHENTICATION = "hadoop.security.authentication";
+    private static final String KERBEROS = "kerberos";
 
     private static final Logger LOG = LoggerFactory.getLogger(HBaseConnector.class.getName());
     private Configuration configuration;
@@ -61,19 +65,31 @@ public class HBaseConnector {
         if (isInMemoryHBase) return;
 
         // Configure HBase
-        String hbaseSite = System.getProperty(HBASE_SITE_XML);
-        if (hbaseSite == null) {
+        String hbaseConfDir = System.getProperty(HBASE_CONF_DIR);
+        if (hbaseConfDir == null) {
             configuration = HBaseConfiguration.create();
-            LOG.debug("No system property '{}' set so using default configuration", HBASE_SITE_XML);
+            LOG.debug("No system property '{}' set so using default configuration", HBASE_CONF_DIR);
         } else {
-            File hbaseSiteFile = new File(hbaseSite);
-            if (hbaseSiteFile.exists()) {
-                LOG.debug("Using settings from hbase-site.xml file at '{}'", hbaseSiteFile.getPath());
-                configuration = new Configuration();
-                configuration.addResource(hbaseSiteFile.getPath());
+            if (Files.isDirectory(Paths.get(hbaseConfDir))) {
+                File hbaseSiteFile = new File(hbaseConfDir, "/hbase-site.xml" );
+                if (hbaseSiteFile.exists()) {
+                    LOG.debug("Using settings from hbase-site.xml file at '{}'", hbaseSiteFile.getPath());
+                    configuration = new Configuration();
+                    configuration.addResource(hbaseSiteFile.getPath());
+                } else {
+                    configuration = HBaseConfiguration.create();
+                    LOG.warn("No hbase-site.xml file found at '{}' so using default configuration", hbaseSiteFile.getPath());
+                }
+                File coreSiteFile = new File(hbaseConfDir, "/core-site.xml" );
+                if (coreSiteFile.exists()) {
+                    LOG.debug("Using settings from core-site.xml file at '{}'", coreSiteFile.getPath());
+                    configuration.addResource(coreSiteFile.getPath());
+                } else {
+                    LOG.warn("No core-site.xml file found at '{}' so using default configuration", coreSiteFile.getPath());
+                }
             } else {
-                configuration = HBaseConfiguration.create();
-                LOG.warn("No hbase-site.xml file found at '{}' so using default configuration", hbaseSite);
+                 = HBaseConfiguration.create();
+                LOG.warn("No directory found at '{}' so using default configuration", hbaseConfDir);
             }
         }
 
@@ -86,7 +102,8 @@ public class HBaseConnector {
             if (krb5File.exists()) {
                 LOG.debug("Found krb5.conf file '{}' so performing Kerberos authentication...", krb5File.getPath());
 
-                configuration.set(HBASE_SECURITY_AUTHENTICATION, "kerberos");
+                configuration.set(HBASE_SECURITY_AUTHENTICATION, KERBEROS);
+                configuration.set(HADOOP_SECURITY_AUTHENTICATION, KERBEROS);
 
                 String zookeeperQuorum = System.getProperty(ZOOKEEPER_QUORUM);
                 String zookeeperPort = System.getProperty(ZOOKEEPER_PORT);
