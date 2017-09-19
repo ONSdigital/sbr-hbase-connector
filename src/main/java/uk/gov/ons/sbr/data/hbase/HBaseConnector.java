@@ -26,6 +26,7 @@ public class HBaseConnector {
     private static final String HBASE_CONFIGURATION_ZOOKEEPER_QUORUM = "hbase.zookeeper.quorum";
     private static final String HBASE_CONFIGURATION_ZOOKEEPER_CLIENTPORT = "hbase.zookeeper.property.clientPort";
     private static final String JAVA_SECURITY_KRB5_CONF = "java.security.krb5.conf";
+    private static final String HBASE_SECURITY_AUTHENTICATION = "hbase.security.authentication";
 
     private static final Logger LOG = LoggerFactory.getLogger(HBaseConnector.class.getName());
     private Configuration configuration;
@@ -84,6 +85,8 @@ public class HBaseConnector {
             File krb5File = new File(krb5);
             if (krb5File.exists()) {
                 LOG.debug("Found krb5.conf file '{}' so performing Kerberos authentication...", krb5File.getPath());
+
+                configuration.set(HBASE_SECURITY_AUTHENTICATION, "kerberos");
 
                 String zookeeperQuorum = System.getProperty(ZOOKEEPER_QUORUM);
                 String zookeeperPort = System.getProperty(ZOOKEEPER_PORT);
