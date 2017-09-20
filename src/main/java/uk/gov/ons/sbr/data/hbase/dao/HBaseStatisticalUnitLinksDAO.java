@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.ons.sbr.data.dao.StatisticalUnitLinksDAO;
 import uk.gov.ons.sbr.data.domain.StatisticalUnit;
-import uk.gov.ons.sbr.data.domain.UnitLinks;
+import uk.gov.ons.sbr.data.domain.StatisticalUnitLinks;
 import uk.gov.ons.sbr.data.domain.UnitType;
 import uk.gov.ons.sbr.data.hbase.table.ColumnFamilies;
 import uk.gov.ons.sbr.data.hbase.table.TableNames;
@@ -63,9 +63,9 @@ public class HBaseStatisticalUnitLinksDAO extends AbstractHBaseDAO implements St
     }
 
     @Override
-    public Optional<UnitLinks> getUnitLinks(YearMonth referencePeriod, String key, UnitType type) throws Exception {
+    public Optional<StatisticalUnitLinks> getUnitLinks(YearMonth referencePeriod, String key, UnitType type) throws Exception {
         String rowKey = RowKeyUtils.createRowKey(referencePeriod, key, type.toString());
-        Optional<UnitLinks> links;
+        Optional<StatisticalUnitLinks> links;
         try (Table table = getConnection().getTable(UNIT_LINKS_TABLE)) {
             Get get = new Get(Bytes.toBytes(rowKey));
             Result result = table.get(get);
@@ -83,8 +83,8 @@ public class HBaseStatisticalUnitLinksDAO extends AbstractHBaseDAO implements St
         return links;
     }
 
-    private UnitLinks convertToUnitLinks(YearMonth referencePeriod, String key, Result result) {
-        UnitLinks links = new UnitLinks(referencePeriod, key);
+    private StatisticalUnitLinks convertToUnitLinks(YearMonth referencePeriod, String key, Result result) {
+        StatisticalUnitLinks links = new StatisticalUnitLinks(referencePeriod, key);
         for (Cell cell : result.listCells()) {
             String column = new String(CellUtil.cloneQualifier(cell));
             String value = new String(CellUtil.cloneValue(cell));
@@ -103,7 +103,7 @@ public class HBaseStatisticalUnitLinksDAO extends AbstractHBaseDAO implements St
     }
 
     @Override
-    public void putUnitLinks(UnitLinks links, UnitType type) throws Exception {
+    public void putUnitLinks(StatisticalUnitLinks links, UnitType type) throws Exception {
         Put linksRow;
         String rowKey = RowKeyUtils.createRowKey(links.getReferencePeriod(), links.getKey(), type.toString());
 

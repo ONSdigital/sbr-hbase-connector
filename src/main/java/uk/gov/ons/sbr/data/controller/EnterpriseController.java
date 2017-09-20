@@ -4,7 +4,7 @@ import uk.gov.ons.sbr.data.dao.EnterpriseDAO;
 import uk.gov.ons.sbr.data.dao.StatisticalUnitLinksDAO;
 import uk.gov.ons.sbr.data.domain.Enterprise;
 import uk.gov.ons.sbr.data.domain.StatisticalUnit;
-import uk.gov.ons.sbr.data.domain.UnitLinks;
+import uk.gov.ons.sbr.data.domain.StatisticalUnitLinks;
 import uk.gov.ons.sbr.data.domain.UnitType;
 import uk.gov.ons.sbr.data.hbase.dao.HBaseEnterpriseDAO;
 import uk.gov.ons.sbr.data.hbase.dao.HBaseStatisticalUnitLinksDAO;
@@ -42,7 +42,7 @@ public class EnterpriseController {
         } else {
             Optional<Enterprise> enterprise = enterpriseDAO.getEnterprise(referencePeriod, enterpriseReferenceNumber);
             if (enterprise.isPresent()) {
-                Optional<UnitLinks> links = unitLinksDAO.getUnitLinks(referencePeriod, enterpriseReferenceNumber, UnitType.ENTERPRISE);
+                Optional<StatisticalUnitLinks> links = unitLinksDAO.getUnitLinks(referencePeriod, enterpriseReferenceNumber, UnitType.ENTERPRISE);
                 if (links.isPresent()) {
                     enterprise.get().setLinks(links.get());
                     enterprise = Optional.of((Enterprise) createUnitHierachy(referencePeriod, enterprise.get(), links.get()));
@@ -79,7 +79,7 @@ public class EnterpriseController {
         cache.remove(cacheKey);
     }
 
-    private StatisticalUnit createUnitHierachy(YearMonth referencePeriod, StatisticalUnit parentUnit, UnitLinks links) throws Exception {
+    private StatisticalUnit createUnitHierachy(YearMonth referencePeriod, StatisticalUnit parentUnit, StatisticalUnitLinks links) throws Exception {
         List<UnitType> directDescendants = parentUnit.getType().getDirectDescendants();
         Map<String, UnitType> children = links.getChildren();
         UnitType childType;
@@ -87,7 +87,7 @@ public class EnterpriseController {
             if (directDescendants.contains(children.get(childKey))) {
                 childType = children.get(childKey);
                 StatisticalUnit childUnit = new StatisticalUnit(referencePeriod, childKey, childType);
-                Optional<UnitLinks> childLinks = unitLinksDAO.getUnitLinks(referencePeriod, childKey, childType);
+                Optional<StatisticalUnitLinks> childLinks = unitLinksDAO.getUnitLinks(referencePeriod, childKey, childType);
                 if (childLinks.isPresent()) {
                     // If the child unit also has children then fetch those
                     if (!childLinks.get().getChildren().isEmpty()) {

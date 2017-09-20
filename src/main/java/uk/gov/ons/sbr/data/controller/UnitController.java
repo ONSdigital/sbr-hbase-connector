@@ -2,7 +2,7 @@ package uk.gov.ons.sbr.data.controller;
 
 import uk.gov.ons.sbr.data.dao.StatisticalUnitLinksDAO;
 import uk.gov.ons.sbr.data.domain.StatisticalUnit;
-import uk.gov.ons.sbr.data.domain.UnitLinks;
+import uk.gov.ons.sbr.data.domain.StatisticalUnitLinks;
 import uk.gov.ons.sbr.data.domain.UnitType;
 import uk.gov.ons.sbr.data.hbase.dao.HBaseStatisticalUnitLinksDAO;
 import uk.gov.ons.sbr.data.hbase.util.ReferencePeriodUtils;
@@ -31,16 +31,16 @@ public class UnitController {
         return unitLinksDAO.scanUnits(referencePeriod, unitReferenceNumber);
     }
 
-    public Optional<UnitLinks> getUnitLinks(String unitReferenceNumber, UnitType type) throws Exception {
+    public Optional<StatisticalUnitLinks> getUnitLinks(String unitReferenceNumber, UnitType type) throws Exception {
         return getUnitLinks(ReferencePeriodUtils.getCurrentPeriod(), unitReferenceNumber, type);
     }
 
-    public Optional<UnitLinks> getUnitLinks(YearMonth referencePeriod, String unitReferenceNumber, UnitType type) throws Exception {
+    public Optional<StatisticalUnitLinks> getUnitLinks(YearMonth referencePeriod, String unitReferenceNumber, UnitType type) throws Exception {
         return unitLinksDAO.getUnitLinks(referencePeriod, unitReferenceNumber, type);
     }
 
     public void updateUnitLinks(YearMonth referencePeriod, String unitKey, UnitType type, Map<UnitType, String> parents, Map<String, UnitType> children) throws Exception {
-        UnitLinks updatedLinks = new UnitLinks(referencePeriod, unitKey);
+        StatisticalUnitLinks updatedLinks = new StatisticalUnitLinks(referencePeriod, unitKey);
         if (parents != null) {
             updatedLinks.setParents(parents);
         }
