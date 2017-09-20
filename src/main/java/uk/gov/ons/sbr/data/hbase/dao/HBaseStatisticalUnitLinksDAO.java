@@ -24,7 +24,6 @@ public class HBaseStatisticalUnitLinksDAO extends AbstractHBaseDAO implements St
 
     private static final TableName UNIT_LINKS_TABLE = TableNames.UNIT_LINKS.getTableName();
     private static final byte[] UNIT_LINKS_CF = ColumnFamilies.UNIT_LINKS_DATA.getColumnFamily();
-    private static final String CHILDREN_COLUMN = "children";
     public static final String PARENT_COLUMN_PREFIX = "p_";
     public static final String CHILD_COLUMN_PREFIX = "c_";
     private static final Logger LOG = LoggerFactory.getLogger(HBaseStatisticalUnitLinksDAO.class.getName());
@@ -93,9 +92,6 @@ public class HBaseStatisticalUnitLinksDAO extends AbstractHBaseDAO implements St
             if (column.startsWith(PARENT_COLUMN_PREFIX)) {
                 LOG.debug("Found unit link parent '{}' with value '{}'", column, value);
                 links.putParent(UnitType.fromString(column.substring(PARENT_COLUMN_PREFIX.length())), value);
-            } else if (column.equals(CHILDREN_COLUMN)) {
-                LOG.debug("Found unit link children '{}' with value '{}'", column, value);
-                links.setChildJsonString(value);
             } else if (column.startsWith(CHILD_COLUMN_PREFIX)) {
                 LOG.debug("Found unit link child '{}' of type '{}'", column, value);
                 links.putChild(UnitType.fromString(value), column.substring(CHILD_COLUMN_PREFIX.length()));
@@ -118,10 +114,6 @@ public class HBaseStatisticalUnitLinksDAO extends AbstractHBaseDAO implements St
             links.getParents().forEach((parentType, value) -> linksRow.addColumn(UNIT_LINKS_CF, Bytes.toBytes(PARENT_COLUMN_PREFIX + parentType.toString()), Bytes.toBytes(value)));
             // Add children
             links.getChildren().forEach((value, childType) -> linksRow.addColumn(UNIT_LINKS_CF, Bytes.toBytes(CHILD_COLUMN_PREFIX + value), Bytes.toBytes(childType.toString())));
-            // Add children json string
-            if (!links.getChildJsonString().isEmpty()) {
-                linksRow.addColumn(UNIT_LINKS_CF, Bytes.toBytes(CHILDREN_COLUMN), Bytes.toBytes(links.getChildJsonString()));
-            }
 
             table.put(linksRow);
             LOG.debug("Inserted unit links data for row key '{}'", rowKey);

@@ -31,15 +31,8 @@ public class UnitController {
         return unitLinksDAO.scanUnits(referencePeriod, unitReferenceNumber);
     }
 
-    public void updateUnitLinks(YearMonth referencePeriod, String unitKey, UnitType type, Map<UnitType, String> parents, String childrenJsonAsString) throws Exception {
-        UnitLinks updatedLinks = new UnitLinks(referencePeriod, unitKey);
-        if (parents != null) {
-            updatedLinks.setParents(parents);
-        }
-        if (childrenJsonAsString != null) {
-            updatedLinks.setChildJsonString(childrenJsonAsString);
-        }
-        unitLinksDAO.putUnitLinks(updatedLinks, type);
+    public Optional<UnitLinks> getUnitLinks(YearMonth referencePeriod, String unitReferenceNumber, UnitType type) throws Exception {
+        return unitLinksDAO.getUnitLinks(referencePeriod, unitReferenceNumber, type);
     }
 
     public void updateUnitLinks(YearMonth referencePeriod, String unitKey, UnitType type, Map<UnitType, String> parents, Map<String, UnitType> children) throws Exception {
