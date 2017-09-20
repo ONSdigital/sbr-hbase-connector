@@ -4,6 +4,7 @@ import com.opencsv.CSVParser;
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -31,8 +32,9 @@ import static uk.gov.ons.sbr.data.hbase.load.BulkLoader.REFERENCE_PERIOD;
 public abstract class AbstractUnitDataKVMapper extends
         Mapper<LongWritable, Text, ImmutableBytesWritable, Put> {
 
-    //CSV file header
     private static final Logger LOG = LoggerFactory.getLogger(AbstractUnitDataKVMapper.class.getName());
+    private static final byte[] LAST_UPDATED_BY_COLUMN = Bytes.toBytes("updatedBy");
+    private static final byte[] LAST_UPDATED_BY_VALUE = Bytes.toBytes("Data Load");
 
     private CSVParser csvParser;
     private YearMonth referencePeriod;
@@ -138,7 +140,12 @@ public abstract class AbstractUnitDataKVMapper extends
                     throw e;
                 }
             }
+
         }
+
+        // Add last updated column
+        put.add(new KeyValue(rowKey.get(), columnFamily, LAST_UPDATED_BY_COLUMN, LAST_UPDATED_BY_VALUE));
+
         context.write(rowKey, put);
     }
 

@@ -20,6 +20,7 @@ public class EnterpriseControllerIT extends AbstractHBaseIT {
 
     private static final YearMonth TEST_REFERENCE_PERIOD = YearMonth.of(2017, Month.JUNE);
     private static final String TEST_ENTERPRISE_REFERENCE_NUMBER = "123456789";
+    private static final String TEST_UPDATED_BY= "unit test";
     private EnterpriseController controller;
 
     @Before
@@ -30,7 +31,7 @@ public class EnterpriseControllerIT extends AbstractHBaseIT {
     @Test
     public void getEnterpriseForCurrentPeriod() throws Exception {
         // Use the update method to insert a new Enterprise
-        controller.updateEnterpriseVariableValue(ReferencePeriodUtils.getCurrentPeriod(), TEST_ENTERPRISE_REFERENCE_NUMBER, "name", "MyEnterprise");
+        controller.updateEnterpriseVariableValue(ReferencePeriodUtils.getCurrentPeriod(), TEST_ENTERPRISE_REFERENCE_NUMBER, TEST_UPDATED_BY,"name", "MyEnterprise");
 
         //Retrieve the inserted Enterprise
         Enterprise enterprise = validateReturnedEnterprise(controller.getEnterprise(TEST_ENTERPRISE_REFERENCE_NUMBER));
@@ -42,7 +43,7 @@ public class EnterpriseControllerIT extends AbstractHBaseIT {
     @Test
     public void getEnterprise() throws Exception {
         // Use the update method to insert a new Enterprise
-        controller.updateEnterpriseVariableValue(TEST_REFERENCE_PERIOD, TEST_ENTERPRISE_REFERENCE_NUMBER, "name", "MyEnterprise");
+        controller.updateEnterpriseVariableValue(TEST_REFERENCE_PERIOD, TEST_ENTERPRISE_REFERENCE_NUMBER, TEST_UPDATED_BY, "name", "MyEnterprise");
 
         //Retrieve the inserted Enterprise
         Enterprise enterprise = validateReturnedEnterprise(controller.getEnterprise(TEST_ENTERPRISE_REFERENCE_NUMBER));
@@ -53,8 +54,8 @@ public class EnterpriseControllerIT extends AbstractHBaseIT {
 
     @Test
     public void updateEnterpriseVariableValue() throws Exception {
-        controller.updateEnterpriseVariableValue(TEST_REFERENCE_PERIOD, TEST_ENTERPRISE_REFERENCE_NUMBER, "name", "MyEnterprise");
-        controller.updateEnterpriseVariableValue(TEST_REFERENCE_PERIOD, TEST_ENTERPRISE_REFERENCE_NUMBER, "name", "MyNewEnterpriseName");
+        controller.updateEnterpriseVariableValue(TEST_REFERENCE_PERIOD, TEST_ENTERPRISE_REFERENCE_NUMBER, TEST_UPDATED_BY,"name", "MyEnterprise");
+        controller.updateEnterpriseVariableValue(TEST_REFERENCE_PERIOD, TEST_ENTERPRISE_REFERENCE_NUMBER, TEST_UPDATED_BY,"name", "MyNewEnterpriseName");
 
         // Retrieve the updated Enterprise
         Enterprise enterprise = validateReturnedEnterprise(controller.getEnterpriseForReferencePeriod(TEST_REFERENCE_PERIOD, TEST_ENTERPRISE_REFERENCE_NUMBER));
@@ -69,13 +70,13 @@ public class EnterpriseControllerIT extends AbstractHBaseIT {
         oldValues.put("name", "MyEnterprise");
         oldValues.put("employees", "10");
         oldValues.put("turnover", "100000");
-        controller.updateEnterpriseVariableValues(TEST_REFERENCE_PERIOD, TEST_ENTERPRISE_REFERENCE_NUMBER, oldValues);
+        controller.updateEnterpriseVariableValues(TEST_REFERENCE_PERIOD, TEST_ENTERPRISE_REFERENCE_NUMBER, TEST_UPDATED_BY, oldValues);
 
         Map<String, String> newValues = new HashMap<>();
         newValues.put("name", "MyNewEnterpriseName");
         newValues.put("employment", "9");
         newValues.put("turnover", "101000");
-        controller.updateEnterpriseVariableValues(TEST_REFERENCE_PERIOD, TEST_ENTERPRISE_REFERENCE_NUMBER, newValues);
+        controller.updateEnterpriseVariableValues(TEST_REFERENCE_PERIOD, TEST_ENTERPRISE_REFERENCE_NUMBER, TEST_UPDATED_BY, newValues);
 
         // Retrieve the updated Enterprise
         Enterprise enterprise = validateReturnedEnterprise(controller.getEnterpriseForReferencePeriod(TEST_REFERENCE_PERIOD, TEST_ENTERPRISE_REFERENCE_NUMBER));

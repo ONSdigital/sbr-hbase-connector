@@ -53,20 +53,20 @@ public class EnterpriseController {
         }
     }
 
-    public void updateEnterpriseVariableValue(YearMonth referencePeriod, String enterpriseReferenceNumber, String variableName, String newValue) throws Exception {
+    public void updateEnterpriseVariableValue(YearMonth referencePeriod, String enterpriseReferenceNumber, String updatedBy, String variableName, String newValue) throws Exception {
         Enterprise updatedEnterprise = new Enterprise(referencePeriod, enterpriseReferenceNumber);
         updatedEnterprise.putVariable(variableName, newValue);
-        updateEnterprise(updatedEnterprise);
+        updateEnterprise(updatedEnterprise, updatedBy);
     }
 
-    public void updateEnterpriseVariableValues(YearMonth referencePeriod, String enterpriseReferenceNumber, Map<String, String> newVariableValues) throws Exception {
+    public void updateEnterpriseVariableValues(YearMonth referencePeriod, String enterpriseReferenceNumber, String updatedBy, Map<String, String> newVariableValues) throws Exception {
         Enterprise updatedEnterprise = new Enterprise(referencePeriod, enterpriseReferenceNumber);
         updatedEnterprise.putVariables(newVariableValues);
-        updateEnterprise(updatedEnterprise);
+        updateEnterprise(updatedEnterprise, updatedBy);
     }
 
-    private void updateEnterprise(Enterprise updatedEnterprise) throws Exception {
-        enterpriseDAO.putEnterprise(updatedEnterprise);
+    private void updateEnterprise(Enterprise updatedEnterprise, String updatedBy) throws Exception {
+        enterpriseDAO.putEnterprise(updatedEnterprise, updatedBy);
         String cacheKey = RowKeyUtils.createRowKey(updatedEnterprise.getReferencePeriod(), updatedEnterprise.getKey());
         cache.remove(cacheKey);
     }

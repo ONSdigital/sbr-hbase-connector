@@ -12,5 +12,5 @@ public interface EnterpriseDAO {
 
     Optional<Enterprise> getEnterprise(YearMonth referencePeriod, String key) throws Exception;
 
-    void putEnterprise(Enterprise enterprise) throws Exception;
+    void putEnterprise(Enterprise enterprise, String updatedBy) throws Exception;
 }
