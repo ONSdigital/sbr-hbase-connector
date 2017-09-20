@@ -42,16 +42,16 @@ public class LocalUnitController {
         return localUnit;
     }
 
-    public void updateLocalUnitVariableValue(YearMonth referencePeriod, String localUnitReferenceNumber, String variableName, String newValue) throws Exception {
+    public void updateLocalUnitVariableValue(YearMonth referencePeriod, String localUnitReferenceNumber, String updatedBy, String variableName, String newValue) throws Exception {
         LocalUnit updatedLocalUnit = new LocalUnit(referencePeriod, localUnitReferenceNumber);
         updatedLocalUnit.putVariable(variableName, newValue);
-        localUnitDAO.putLocalUnit(updatedLocalUnit);
+        localUnitDAO.putLocalUnit(updatedLocalUnit, updatedBy);
     }
 
-    public void updateLocalUnitVariableValues(YearMonth referencePeriod, String localUnitReferenceNumber, Map<String, String> newVariableValues) throws Exception {
+    public void updateLocalUnitVariableValues(YearMonth referencePeriod, String localUnitReferenceNumber, String updatedBy, Map<String, String> newVariableValues) throws Exception {
         LocalUnit updatedLocalUnit = new LocalUnit(referencePeriod, localUnitReferenceNumber);
         updatedLocalUnit.putVariables(newVariableValues);
-        localUnitDAO.putLocalUnit(updatedLocalUnit);
+        localUnitDAO.putLocalUnit(updatedLocalUnit, updatedBy);
     }
 
 }

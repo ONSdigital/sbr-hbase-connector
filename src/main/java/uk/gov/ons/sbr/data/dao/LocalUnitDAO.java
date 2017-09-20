@@ -12,5 +12,5 @@ public interface LocalUnitDAO {
 
     Optional<LocalUnit> getLocalUnit(YearMonth referencePeriod, String key) throws Exception;
 
-    void putLocalUnit(LocalUnit localUnit) throws Exception;
+    void putLocalUnit(LocalUnit localUnit, String updatedBy) throws Exception;
 }

@@ -63,7 +63,7 @@ public abstract class AbstractHBaseEnterpriseDAOTest {
 
     @Test
     public void putEnterprise() throws Exception {
-        dao.putEnterprise(testEnterprise);
+        dao.putEnterprise(testEnterprise, "unit test");
     }
 
 }

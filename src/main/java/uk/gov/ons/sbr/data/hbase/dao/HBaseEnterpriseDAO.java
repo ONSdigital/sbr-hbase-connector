@@ -15,17 +15,14 @@ import java.util.Optional;
  */
 public class HBaseEnterpriseDAO extends HBaseStatisticalUnitDAO implements EnterpriseDAO {
 
-    private static final byte[] ENTERPRISE_CF = ColumnFamilies.ENTERPRISE_DATA.getColumnFamily();
-    private static final Logger LOG = LoggerFactory.getLogger(HBaseEnterpriseDAO.class.getName());
-
     @Override
     public Optional<Enterprise> getEnterprise(YearMonth referencePeriod, String key) throws Exception {
         return getUnit(UnitType.ENTERPRISE, referencePeriod, key);
     }
 
     @Override
-    public void putEnterprise(Enterprise enterprise) throws Exception {
-        putUnit(enterprise);
+    public void putEnterprise(Enterprise enterprise, String updatedBy) throws Exception {
+        putUnit(enterprise, updatedBy);
     }
 
 }
