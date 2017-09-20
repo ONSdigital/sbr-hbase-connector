@@ -31,6 +31,10 @@ public class UnitController {
         return unitLinksDAO.scanUnits(referencePeriod, unitReferenceNumber);
     }
 
+    public Optional<UnitLinks> getUnitLinks(String unitReferenceNumber, UnitType type) throws Exception {
+        return getUnitLinks(ReferencePeriodUtils.getCurrentPeriod(), unitReferenceNumber, type);
+    }
+
     public Optional<UnitLinks> getUnitLinks(YearMonth referencePeriod, String unitReferenceNumber, UnitType type) throws Exception {
         return unitLinksDAO.getUnitLinks(referencePeriod, unitReferenceNumber, type);
     }

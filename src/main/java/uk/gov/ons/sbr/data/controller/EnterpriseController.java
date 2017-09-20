@@ -53,10 +53,18 @@ public class EnterpriseController {
         }
     }
 
+    public void updateEnterpriseVariableValue(String enterpriseReferenceNumber, String updatedBy, String variableName, String newValue) throws Exception {
+        updateEnterpriseVariableValue(ReferencePeriodUtils.getCurrentPeriod(), enterpriseReferenceNumber, updatedBy, variableName, newValue);
+    }
+
     public void updateEnterpriseVariableValue(YearMonth referencePeriod, String enterpriseReferenceNumber, String updatedBy, String variableName, String newValue) throws Exception {
         Enterprise updatedEnterprise = new Enterprise(referencePeriod, enterpriseReferenceNumber);
         updatedEnterprise.putVariable(variableName, newValue);
         updateEnterprise(updatedEnterprise, updatedBy);
+    }
+
+    public void updateEnterpriseVariableValues(String enterpriseReferenceNumber, String updatedBy, Map<String, String> newVariableValues) throws Exception {
+        updateEnterpriseVariableValues(ReferencePeriodUtils.getCurrentPeriod(), enterpriseReferenceNumber, updatedBy, newVariableValues);
     }
 
     public void updateEnterpriseVariableValues(YearMonth referencePeriod, String enterpriseReferenceNumber, String updatedBy, Map<String, String> newVariableValues) throws Exception {
