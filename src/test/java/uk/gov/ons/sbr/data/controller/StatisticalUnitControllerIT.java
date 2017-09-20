@@ -3,7 +3,7 @@ package uk.gov.ons.sbr.data.controller;
 import org.junit.Before;
 import org.junit.Test;
 import uk.gov.ons.sbr.data.domain.StatisticalUnit;
-import uk.gov.ons.sbr.data.domain.UnitLinks;
+import uk.gov.ons.sbr.data.domain.StatisticalUnitLinks;
 import uk.gov.ons.sbr.data.domain.UnitType;
 import uk.gov.ons.sbr.data.hbase.AbstractHBaseIT;
 
@@ -80,11 +80,11 @@ public class StatisticalUnitControllerIT extends AbstractHBaseIT {
     @Test
     public void getLinks() throws Exception {
         // Get Unit Links
-        Optional<UnitLinks> links = controller.getUnitLinks(TEST_REFERENCE_PERIOD, TEST_KEY, UnitType.LEGAL_UNIT);
+        Optional<StatisticalUnitLinks> links = controller.getUnitLinks(TEST_REFERENCE_PERIOD, TEST_KEY, UnitType.LEGAL_UNIT);
         assertTrue("Failure - links should be found", links.isPresent());
-        UnitLinks unitLinks = links.get();
-        assertEquals("Failure - invalid unit type", parents, unitLinks.getParents());
-        assertEquals("Failure - invalid children Json string", children, unitLinks.getChildren());
+        StatisticalUnitLinks statisticalUnitLinks = links.get();
+        assertEquals("Failure - invalid unit type", parents, statisticalUnitLinks.getParents());
+        assertEquals("Failure - invalid children Json string", children, statisticalUnitLinks.getChildren());
     }
 
 }

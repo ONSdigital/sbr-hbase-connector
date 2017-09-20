@@ -1,7 +1,7 @@
 package uk.gov.ons.sbr.data.dao;
 
 import uk.gov.ons.sbr.data.domain.StatisticalUnit;
-import uk.gov.ons.sbr.data.domain.UnitLinks;
+import uk.gov.ons.sbr.data.domain.StatisticalUnitLinks;
 import uk.gov.ons.sbr.data.domain.UnitType;
 
 import java.time.YearMonth;
@@ -12,7 +12,7 @@ public interface StatisticalUnitLinksDAO {
 
     Optional<List<StatisticalUnit>> scanUnits(YearMonth referencePeriod, String key) throws Exception;
 
-    Optional<UnitLinks> getUnitLinks(YearMonth referencePeriod, String key, UnitType type) throws Exception;
+    Optional<StatisticalUnitLinks> getUnitLinks(YearMonth referencePeriod, String key, UnitType type) throws Exception;
 
-    void putUnitLinks(UnitLinks links, UnitType type) throws Exception;
+    void putUnitLinks(StatisticalUnitLinks links, UnitType type) throws Exception;
 }

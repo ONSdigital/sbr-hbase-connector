@@ -1,11 +1,8 @@
 package uk.gov.ons.sbr.data.hbase.dao;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.gov.ons.sbr.data.dao.EnterpriseDAO;
 import uk.gov.ons.sbr.data.domain.Enterprise;
 import uk.gov.ons.sbr.data.domain.UnitType;
-import uk.gov.ons.sbr.data.hbase.table.ColumnFamilies;
 
 import java.time.YearMonth;
 import java.util.Optional;
@@ -26,4 +23,3 @@ public class HBaseEnterpriseDAO extends HBaseStatisticalUnitDAO implements Enter
     }
 
 }
-
