@@ -88,7 +88,7 @@ public class HBaseConnector {
                     LOG.warn("No core-site.xml file found at '{}' so using default configuration", coreSiteFile.getPath());
                 }
             } else {
-                 = HBaseConfiguration.create();
+                 HBaseConfiguration.create();
                 LOG.warn("No directory found at '{}' so using default configuration", hbaseConfDir);
             }
         }
