@@ -86,6 +86,7 @@ public class EnterpriseControllerIT extends AbstractHBaseIT {
         assertEquals("Failure - invalid enterprise employees", "10", enterprise.getVariables().get("employees"));
         assertEquals("Failure - invalid enterprise turnover", "101000", enterprise.getVariables().get("turnover"));
         assertEquals("Failure - invalid enterprise employment", "9", enterprise.getVariables().get("employment"));
+        assertEquals("Failure - invalid enterprise updatedBy", TEST_UPDATED_BY, enterprise.getVariables().get("updatedBy"));
 
     }
 
