@@ -102,8 +102,8 @@ public class HBaseConnector {
             if (krb5File.exists()) {
                 LOG.debug("Found krb5.conf file '{}' so performing Kerberos authentication...", krb5File.getPath());
 
-                //configuration.set(HBASE_SECURITY_AUTHENTICATION, KERBEROS);
-                //configuration.set(HADOOP_SECURITY_AUTHENTICATION, KERBEROS);
+                configuration.set(HBASE_SECURITY_AUTHENTICATION, KERBEROS);
+                configuration.set(HADOOP_SECURITY_AUTHENTICATION, KERBEROS);
 
                 String zookeeperQuorum = System.getProperty(ZOOKEEPER_QUORUM);
                 String zookeeperPort = System.getProperty(ZOOKEEPER_PORT);
