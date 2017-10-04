@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class EnterpriseControllerIT extends AbstractHBaseIT {
@@ -46,10 +47,21 @@ public class EnterpriseControllerIT extends AbstractHBaseIT {
         controller.updateEnterpriseVariableValue(TEST_REFERENCE_PERIOD, TEST_ENTERPRISE_REFERENCE_NUMBER, TEST_UPDATED_BY, "name", "MyEnterprise");
 
         //Retrieve the inserted Enterprise
-        Enterprise enterprise = validateReturnedEnterprise(controller.getEnterprise(TEST_ENTERPRISE_REFERENCE_NUMBER));
+        Enterprise enterprise = validateReturnedEnterprise(controller.getEnterpriseForReferencePeriod(TEST_REFERENCE_PERIOD, TEST_ENTERPRISE_REFERENCE_NUMBER));
 
         assertEquals("Failure - invalid enterprise reference period", TEST_REFERENCE_PERIOD, enterprise.getReferencePeriod());
         assertEquals("Failure - invalid enterprise name", "MyEnterprise", enterprise.getVariables().get("name"));
+    }
+
+    @Test
+    public void getEnterpriseForInvalidPeriod() throws Exception {
+        // Use the update method to insert a new Enterprise
+        controller.updateEnterpriseVariableValue(ReferencePeriodUtils.getCurrentPeriod(), TEST_ENTERPRISE_REFERENCE_NUMBER, TEST_UPDATED_BY,"name", "MyEnterprise");
+
+        //Retrieve the inserted Enterprise
+        Optional<Enterprise> enterprise = controller.getEnterpriseForReferencePeriod(YearMonth.of(2000, 01), TEST_ENTERPRISE_REFERENCE_NUMBER);
+
+        assertFalse("Failure - enterprise found", enterprise.isPresent());
     }
 
     @Test
@@ -86,6 +98,7 @@ public class EnterpriseControllerIT extends AbstractHBaseIT {
         assertEquals("Failure - invalid enterprise employees", "10", enterprise.getVariables().get("employees"));
         assertEquals("Failure - invalid enterprise turnover", "101000", enterprise.getVariables().get("turnover"));
         assertEquals("Failure - invalid enterprise employment", "9", enterprise.getVariables().get("employment"));
+        assertEquals("Failure - invalid enterprise updatedBy", TEST_UPDATED_BY, enterprise.getVariables().get("updatedBy"));
 
     }
 

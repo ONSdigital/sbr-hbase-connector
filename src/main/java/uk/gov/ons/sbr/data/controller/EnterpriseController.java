@@ -1,11 +1,14 @@
 package uk.gov.ons.sbr.data.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.ons.sbr.data.dao.EnterpriseDAO;
 import uk.gov.ons.sbr.data.dao.StatisticalUnitLinksDAO;
 import uk.gov.ons.sbr.data.domain.Enterprise;
 import uk.gov.ons.sbr.data.domain.StatisticalUnit;
 import uk.gov.ons.sbr.data.domain.StatisticalUnitLinks;
 import uk.gov.ons.sbr.data.domain.UnitType;
+import uk.gov.ons.sbr.data.hbase.HBaseConnector;
 import uk.gov.ons.sbr.data.hbase.dao.HBaseEnterpriseDAO;
 import uk.gov.ons.sbr.data.hbase.dao.HBaseStatisticalUnitLinksDAO;
 import uk.gov.ons.sbr.data.hbase.util.ReferencePeriodUtils;
@@ -22,9 +25,10 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class EnterpriseController {
 
+    private static final Logger LOG = LoggerFactory.getLogger(HBaseConnector.class.getName());
+    private static final ConcurrentHashMap<String, Optional<Enterprise>> cache = new ConcurrentHashMap<>();
     private EnterpriseDAO enterpriseDAO;
     private StatisticalUnitLinksDAO unitLinksDAO;
-    private ConcurrentHashMap<String, Optional<Enterprise>> cache = new ConcurrentHashMap<>();
 
     public EnterpriseController() {
         this.enterpriseDAO = new HBaseEnterpriseDAO();
@@ -38,6 +42,7 @@ public class EnterpriseController {
     public Optional<Enterprise> getEnterpriseForReferencePeriod(YearMonth referencePeriod, String enterpriseReferenceNumber) throws Exception {
         String cacheKey = RowKeyUtils.createRowKey(referencePeriod, enterpriseReferenceNumber);
         if (cache.containsKey(cacheKey)) {
+            LOG.debug("Enterprise with cache key '{}' found in cache, returning from cache", cacheKey);
             return cache.get(cacheKey);
         } else {
             Optional<Enterprise> enterprise = enterpriseDAO.getEnterprise(referencePeriod, enterpriseReferenceNumber);
@@ -47,6 +52,7 @@ public class EnterpriseController {
                     enterprise.get().setLinks(links.get());
                     enterprise = Optional.of((Enterprise) createUnitHierachy(referencePeriod, enterprise.get(), links.get()));
                 }
+                LOG.debug("Inserting Enterprise with cache key '{}' into the cache", cacheKey);
                 cache.put(cacheKey, enterprise);
             }
             return enterprise;
@@ -76,6 +82,7 @@ public class EnterpriseController {
     private void updateEnterprise(Enterprise updatedEnterprise, String updatedBy) throws Exception {
         enterpriseDAO.putEnterprise(updatedEnterprise, updatedBy);
         String cacheKey = RowKeyUtils.createRowKey(updatedEnterprise.getReferencePeriod(), updatedEnterprise.getKey());
+        LOG.debug("Removing Enterprise with cache key '{}' from the cache as the Enterprise has been updated", cacheKey);
         cache.remove(cacheKey);
     }
 
