@@ -18,8 +18,8 @@ public class HBaseLocalUnitDAO extends HBaseStatisticalUnitDAO implements LocalU
     }
 
     @Override
-    public void putLocalUnit(LocalUnit localUnit) throws Exception {
-        putUnit(localUnit);
+    public void putLocalUnit(LocalUnit localUnit, String updatedBy) throws Exception {
+        putUnit(localUnit, updatedBy);
     }
 
 }

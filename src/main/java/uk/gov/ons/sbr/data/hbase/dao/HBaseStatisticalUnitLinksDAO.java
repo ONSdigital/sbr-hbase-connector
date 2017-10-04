@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.ons.sbr.data.dao.StatisticalUnitLinksDAO;
 import uk.gov.ons.sbr.data.domain.StatisticalUnit;
-import uk.gov.ons.sbr.data.domain.UnitLinks;
+import uk.gov.ons.sbr.data.domain.StatisticalUnitLinks;
 import uk.gov.ons.sbr.data.domain.UnitType;
 import uk.gov.ons.sbr.data.hbase.table.ColumnFamilies;
 import uk.gov.ons.sbr.data.hbase.table.TableNames;
@@ -24,7 +24,6 @@ public class HBaseStatisticalUnitLinksDAO extends AbstractHBaseDAO implements St
 
     private static final TableName UNIT_LINKS_TABLE = TableNames.UNIT_LINKS.getTableName();
     private static final byte[] UNIT_LINKS_CF = ColumnFamilies.UNIT_LINKS_DATA.getColumnFamily();
-    private static final String CHILDREN_COLUMN = "children";
     public static final String PARENT_COLUMN_PREFIX = "p_";
     public static final String CHILD_COLUMN_PREFIX = "c_";
     private static final Logger LOG = LoggerFactory.getLogger(HBaseStatisticalUnitLinksDAO.class.getName());
@@ -64,9 +63,9 @@ public class HBaseStatisticalUnitLinksDAO extends AbstractHBaseDAO implements St
     }
 
     @Override
-    public Optional<UnitLinks> getUnitLinks(YearMonth referencePeriod, String key, UnitType type) throws Exception {
+    public Optional<StatisticalUnitLinks> getUnitLinks(YearMonth referencePeriod, String key, UnitType type) throws Exception {
         String rowKey = RowKeyUtils.createRowKey(referencePeriod, key, type.toString());
-        Optional<UnitLinks> links;
+        Optional<StatisticalUnitLinks> links;
         try (Table table = getConnection().getTable(UNIT_LINKS_TABLE)) {
             Get get = new Get(Bytes.toBytes(rowKey));
             Result result = table.get(get);
@@ -84,8 +83,8 @@ public class HBaseStatisticalUnitLinksDAO extends AbstractHBaseDAO implements St
         return links;
     }
 
-    private UnitLinks convertToUnitLinks(YearMonth referencePeriod, String key, Result result) {
-        UnitLinks links = new UnitLinks(referencePeriod, key);
+    private StatisticalUnitLinks convertToUnitLinks(YearMonth referencePeriod, String key, Result result) {
+        StatisticalUnitLinks links = new StatisticalUnitLinks(referencePeriod, key);
         for (Cell cell : result.listCells()) {
             String column = new String(CellUtil.cloneQualifier(cell));
             String value = new String(CellUtil.cloneValue(cell));
@@ -93,9 +92,6 @@ public class HBaseStatisticalUnitLinksDAO extends AbstractHBaseDAO implements St
             if (column.startsWith(PARENT_COLUMN_PREFIX)) {
                 LOG.debug("Found unit link parent '{}' with value '{}'", column, value);
                 links.putParent(UnitType.fromString(column.substring(PARENT_COLUMN_PREFIX.length())), value);
-            } else if (column.equals(CHILDREN_COLUMN)) {
-                LOG.debug("Found unit link children '{}' with value '{}'", column, value);
-                links.setChildJsonString(value);
             } else if (column.startsWith(CHILD_COLUMN_PREFIX)) {
                 LOG.debug("Found unit link child '{}' of type '{}'", column, value);
                 links.putChild(UnitType.fromString(value), column.substring(CHILD_COLUMN_PREFIX.length()));
@@ -107,7 +103,7 @@ public class HBaseStatisticalUnitLinksDAO extends AbstractHBaseDAO implements St
     }
 
     @Override
-    public void putUnitLinks(UnitLinks links, UnitType type) throws Exception {
+    public void putUnitLinks(StatisticalUnitLinks links, UnitType type) throws Exception {
         Put linksRow;
         String rowKey = RowKeyUtils.createRowKey(links.getReferencePeriod(), links.getKey(), type.toString());
 
@@ -118,10 +114,6 @@ public class HBaseStatisticalUnitLinksDAO extends AbstractHBaseDAO implements St
             links.getParents().forEach((parentType, value) -> linksRow.addColumn(UNIT_LINKS_CF, Bytes.toBytes(PARENT_COLUMN_PREFIX + parentType.toString()), Bytes.toBytes(value)));
             // Add children
             links.getChildren().forEach((value, childType) -> linksRow.addColumn(UNIT_LINKS_CF, Bytes.toBytes(CHILD_COLUMN_PREFIX + value), Bytes.toBytes(childType.toString())));
-            // Add children json string
-            if (!links.getChildJsonString().isEmpty()) {
-                linksRow.addColumn(UNIT_LINKS_CF, Bytes.toBytes(CHILDREN_COLUMN), Bytes.toBytes(links.getChildJsonString()));
-            }
 
             table.put(linksRow);
             LOG.debug("Inserted unit links data for row key '{}'", rowKey);

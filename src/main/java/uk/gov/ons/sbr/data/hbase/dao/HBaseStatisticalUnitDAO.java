@@ -24,6 +24,8 @@ import java.util.Optional;
 public class HBaseStatisticalUnitDAO extends AbstractHBaseDAO {
 
     private static final Logger LOG = LoggerFactory.getLogger(HBaseStatisticalUnitDAO.class.getName());
+    private static final String LAST_UPDATED_BY_COLUMN = "updatedBy";
+    private static final String LAST_UPDATED_TIMESTAMP = "updatedTimestamp";
 
     <T extends StatisticalUnit> Optional<T> getUnit(UnitType unitType, YearMonth referencePeriod, String key) throws Exception {
         return this.getUnit(unitType, RowKeyUtils.createRowKey(referencePeriod, key));
@@ -56,11 +58,16 @@ public class HBaseStatisticalUnitDAO extends AbstractHBaseDAO {
             String value = new String(CellUtil.cloneValue(cell));
             LOG.debug("Found {} data column '{}' with value '{}'", unitType, column, value);
             unit.putVariable(column, value);
+            if (column.equals(LAST_UPDATED_BY_COLUMN)) {
+                long timestamp = cell.getTimestamp();
+                LOG.debug("Creating {} variable '{}' with value '{}'", unitType, LAST_UPDATED_TIMESTAMP, timestamp);
+            }
         }
         return (T)unit;
     }
 
-    void putUnit(StatisticalUnit unit) throws Exception {
+    void putUnit(StatisticalUnit unit, String updatedBy) throws Exception {
+        unit.putVariable(LAST_UPDATED_BY_COLUMN, updatedBy);
         Put unitRow;
         String rowKey = RowKeyUtils.createRowKey(unit.getReferencePeriod(), unit.getKey());
         try (Table table = getConnection().getTable(TableNames.forUnitType(unit.getType()))) {

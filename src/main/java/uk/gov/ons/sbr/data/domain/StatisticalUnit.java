@@ -21,7 +21,7 @@ public class StatisticalUnit extends AbstractPeriodEntity {
     @JsonIgnore
     private Map<String, String> variables;
     @JsonIgnore
-    private UnitLinks links;
+    private StatisticalUnitLinks links;
     @JsonProperty("children")
     private List<StatisticalUnit> children;
 
@@ -29,7 +29,7 @@ public class StatisticalUnit extends AbstractPeriodEntity {
         super(referencePeriod, key);
         this.type = type;
         this.variables = new HashMap<>();
-        this.links = new UnitLinks(referencePeriod, key);
+        this.links = new StatisticalUnitLinks(referencePeriod, key);
         this.children = new ArrayList<>();
     }
 
@@ -49,11 +49,11 @@ public class StatisticalUnit extends AbstractPeriodEntity {
         this.variables.putAll(newVariables);
     }
 
-    public UnitLinks getLinks() {
+    public StatisticalUnitLinks getLinks() {
         return links;
     }
 
-    public void setLinks(UnitLinks links) {
+    public void setLinks(StatisticalUnitLinks links) {
         this.links = links;
     }
 
