@@ -60,7 +60,7 @@ public class BulkLoader extends Configured implements Tool {
         }
         try {
             YearMonth.parse(strings[ARG_REFERENCE_PERIOD], DateTimeFormatter.ofPattern(RowKeyUtils.getReferencePeriodFormat()));
-            System.setProperty(REFERENCE_PERIOD, strings[ARG_REFERENCE_PERIOD]);
+            getConf().set(REFERENCE_PERIOD, strings[ARG_REFERENCE_PERIOD]);
         } catch (Exception e) {
             LOG.error("Cannot parse reference period with value '{}'. Format should be '{}'", strings[ARG_REFERENCE_PERIOD], RowKeyUtils.getReferencePeriodFormat());
             System.exit(ERROR);
