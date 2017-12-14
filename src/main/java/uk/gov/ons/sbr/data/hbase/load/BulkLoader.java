@@ -131,13 +131,14 @@ public class BulkLoader extends Configured implements Tool {
 
                             // Auto configure partitioner and reducer
                             HFileOutputFormat2.configureIncrementalLoad(job, table, regionLocator);
-                            FileOutputFormat.setOutputPath(job, new Path(String.format("%s%s%s_%s_%d", outputFilePath, Path.SEPARATOR, unitType.toString(), referencePeriod, start.getEpochSecond())));
+                            Path hfilePath = new Path(String.format("%s%s%s_%s_%d", outputFilePath, Path.SEPARATOR, unitType.toString(), referencePeriod, start.getEpochSecond()));
+                            FileOutputFormat.setOutputPath(job, hfilePath);
 
                             if (job.waitForCompletion(true)) {
                                 try (Admin admin = connection.getAdmin()) {
                                     // Load generated HFiles into table
                                     LoadIncrementalHFiles loader = new LoadIncrementalHFiles(conf);
-                                    loader.doBulkLoad(new Path(outputFilePath), admin, table, regionLocator);
+                                    loader.doBulkLoad(hfilePath, admin, table, regionLocator);
                                 }
                             } else {
                                 LOG.error("Loading of data failed.");
