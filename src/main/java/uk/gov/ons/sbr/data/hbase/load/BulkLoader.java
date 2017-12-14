@@ -131,7 +131,7 @@ public class BulkLoader extends Configured implements Tool {
 
                             // Auto configure partitioner and reducer
                             HFileOutputFormat2.configureIncrementalLoad(job, table, regionLocator);
-                            FileOutputFormat.setOutputPath(job, new Path(String.format("%s%s%s_%s_%s", outputFilePath, File.pathSeparator, unitType.toString(), referencePeriod, start.toString())));
+                            FileOutputFormat.setOutputPath(job, new Path(String.format("%s%s%s_%s_%d", outputFilePath, Path.SEPARATOR, unitType.toString(), referencePeriod, start.getEpochSecond())));
 
                             if (job.waitForCompletion(true)) {
                                 try (Admin admin = connection.getAdmin()) {
