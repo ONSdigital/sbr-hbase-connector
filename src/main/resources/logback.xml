@@ -9,12 +9,12 @@
         </encoder>
     </appender>
 
-    <logger name="uk.gov.ons" level="FINE"
+    <logger name="uk.gov.ons" level="INFO"
             additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
 
-    <root level="DEBUG">
+    <root level="WARN">
         <appender-ref ref="STDOUT" />
     </root>
 

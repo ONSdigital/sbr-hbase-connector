@@ -1,6 +1,7 @@
 package uk.gov.ons.sbr.data.hbase.load;
 
 import com.opencsv.CSVParser;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
@@ -65,12 +66,13 @@ public abstract class AbstractUnitDataKVMapper extends
 
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
+        Configuration conf = context.getConfiguration();
         if (!useCsvHeaderAsColumnNames()) {
             LOG.debug("Using pre-defined column headers for {} file not those in the csv file", getUnitType());
             columnNames = getColumnNames();
         }
         columnFamily = getColumnFamily();
-        String periodStr = System.getProperty(REFERENCE_PERIOD);
+        String periodStr = conf.get(REFERENCE_PERIOD);
         try {
             referencePeriod = YearMonth.parse(periodStr, DateTimeFormatter.ofPattern(RowKeyUtils.getReferencePeriodFormat()));
         } catch (Exception e) {

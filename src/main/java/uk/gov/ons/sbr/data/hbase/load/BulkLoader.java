@@ -60,7 +60,7 @@ public class BulkLoader extends Configured implements Tool {
         }
         try {
             YearMonth.parse(strings[ARG_REFERENCE_PERIOD], DateTimeFormatter.ofPattern(RowKeyUtils.getReferencePeriodFormat()));
-            System.setProperty(REFERENCE_PERIOD, strings[ARG_REFERENCE_PERIOD]);
+            getConf().set(REFERENCE_PERIOD, strings[ARG_REFERENCE_PERIOD]);
         } catch (Exception e) {
             LOG.error("Cannot parse reference period with value '{}'. Format should be '{}'", strings[ARG_REFERENCE_PERIOD], RowKeyUtils.getReferencePeriodFormat());
             System.exit(ERROR);
@@ -131,13 +131,14 @@ public class BulkLoader extends Configured implements Tool {
 
                             // Auto configure partitioner and reducer
                             HFileOutputFormat2.configureIncrementalLoad(job, table, regionLocator);
-                            FileOutputFormat.setOutputPath(job, new Path(String.format("%s%s%s_%s_%s", outputFilePath, File.pathSeparator, unitType.toString(), referencePeriod, start.toString())));
+                            Path hfilePath = new Path(String.format("%s%s%s_%s_%d", outputFilePath, Path.SEPARATOR, unitType.toString(), referencePeriod, start.getEpochSecond()));
+                            FileOutputFormat.setOutputPath(job, hfilePath);
 
                             if (job.waitForCompletion(true)) {
                                 try (Admin admin = connection.getAdmin()) {
                                     // Load generated HFiles into table
                                     LoadIncrementalHFiles loader = new LoadIncrementalHFiles(conf);
-                                    loader.doBulkLoad(new Path(outputFilePath), admin, table, regionLocator);
+                                    loader.doBulkLoad(hfilePath, admin, table, regionLocator);
                                 }
                             } else {
                                 LOG.error("Loading of data failed.");
