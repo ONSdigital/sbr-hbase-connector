@@ -1,0 +1,4 @@
+drop_namespace 'sbr_local'
+create_namespace 'sbr_local'
+create 'sbr_local:enterprise', 'd'
+create 'sbr_local:unit_links', 'd'
